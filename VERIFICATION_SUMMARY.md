@@ -144,7 +144,7 @@ Key dependencies:
 - react-native@0.81.4 ✅
 - @react-navigation/native@7.1.18 ✅
 - @supabase/supabase-js@2.74.0 ✅
-- expo-camera@16.0.18 ✅
+- expo-camera@~16.0.11 (installed: 16.0.18) ✅
 ```
 
 **Status:** ✅ Alla dependencies OK
