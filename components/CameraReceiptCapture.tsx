@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
-import { Camera, CameraType } from 'expo-camera';
+import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 
 interface CameraReceiptCaptureProps {
@@ -20,18 +20,11 @@ export const CameraReceiptCapture: React.FC<CameraReceiptCaptureProps> = ({
   onCapture,
   onClose,
 }) => {
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-  const [type, setType] = useState(CameraType.back);
+  const [permission, requestPermission] = useCameraPermissions();
+  const [facing, setFacing] = useState<CameraType>('back');
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const cameraRef = useRef<Camera>(null);
-
-  React.useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
-  }, []);
+  const cameraRef = useRef<CameraView>(null);
 
   const takePicture = async () => {
     if (cameraRef.current) {
@@ -39,10 +32,10 @@ export const CameraReceiptCapture: React.FC<CameraReceiptCaptureProps> = ({
       try {
         const photo = await cameraRef.current.takePictureAsync({
           quality: 0.8,
-          base64: false,
-          exif: false,
         });
-        setCapturedImage(photo.uri);
+        if (photo) {
+          setCapturedImage(photo.uri);
+        }
       } catch (error) {
         Alert.alert('Error', 'Failed to take picture');
         console.error(error);
@@ -81,7 +74,7 @@ export const CameraReceiptCapture: React.FC<CameraReceiptCaptureProps> = ({
     setCapturedImage(null);
   };
 
-  if (hasPermission === null) {
+  if (!permission) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#3b82f6" />
@@ -90,10 +83,13 @@ export const CameraReceiptCapture: React.FC<CameraReceiptCaptureProps> = ({
     );
   }
 
-  if (hasPermission === false) {
+  if (!permission.granted) {
     return (
       <View style={styles.container}>
         <Text style={styles.errorText}>📷 No access to camera</Text>
+        <TouchableOpacity style={styles.button} onPress={requestPermission}>
+          <Text style={styles.buttonText}>Grant Permission</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={pickImage}>
           <Text style={styles.buttonText}>Choose from Library</Text>
         </TouchableOpacity>
@@ -124,7 +120,7 @@ export const CameraReceiptCapture: React.FC<CameraReceiptCaptureProps> = ({
 
   return (
     <View style={styles.container}>
-      <Camera style={styles.camera} type={type} ref={cameraRef}>
+      <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
         <View style={styles.overlay}>
           <View style={styles.header}>
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -134,8 +130,8 @@ export const CameraReceiptCapture: React.FC<CameraReceiptCaptureProps> = ({
             <TouchableOpacity
               style={styles.flipButton}
               onPress={() => {
-                setType(
-                  type === CameraType.back ? CameraType.front : CameraType.back
+                setFacing(
+                  facing === 'back' ? 'front' : 'back'
                 );
               }}
             >
@@ -173,7 +169,7 @@ export const CameraReceiptCapture: React.FC<CameraReceiptCaptureProps> = ({
             <View style={styles.placeholder} />
           </View>
         </View>
-      </Camera>
+      </CameraView>
     </View>
   );
 };
