@@ -198,38 +198,67 @@ npm run lint
 
 ## 📦 Bygg och Deploy
 
-### iOS
+**✅ DEPLOYMENT READY!** Alla tekniska förutsättningar uppfyllda.
+
+📚 **Deployment Guides:**
+- **[DEPLOYMENT_QUICKSTART.md](DEPLOYMENT_QUICKSTART.md)** - Snabbguide (10 minuter)
+- **[EXPO_DEPLOY_VERIFICATION.md](EXPO_DEPLOY_VERIFICATION.md)** - Komplett verifiering & troubleshooting
+
+### Snabbstart (10 minuter)
+
 ```bash
-# Installera EAS CLI
+# 1. Installera EAS CLI
 npm install -g eas-cli
 
-# Logga in
+# 2. Logga in
 eas login
 
-# Konfigurera projekt
-eas build:configure
+# 3. Initiera projekt (får Expo project ID)
+eas project:init
 
-# Bygg för iOS
-eas build --platform ios
+# 4. Skapa Expo token
+eas token:create
+# → Lägg till token i GitHub Secrets som EXPO_TOKEN
+
+# 5. Test build
+eas build --profile preview --platform all
+
+# 6. Production deploy via GitHub Release
+gh release create v1.0.0
+```
+
+### iOS
+```bash
+# Development build (simulator)
+eas build --profile development --platform ios
+
+# Production build
+eas build --profile production --platform ios
+
+# Submit till App Store
+eas submit --platform ios
 ```
 
 ### Android
 ```bash
-# Bygg för Android
-eas build --platform android
+# Development build (APK)
+eas build --profile development --platform android
 
-# Bygg för både iOS och Android
-eas build --platform all
-```
+# Production build (AAB)
+eas build --profile production --platform android
 
-### Publicera till stores
-```bash
-# Submit till App Store
-eas submit --platform ios
-
-# Submit till Play Store
+# Submit till Google Play
 eas submit --platform android
 ```
+
+### Automatisk Deploy via GitHub Actions
+
+När du skapar en GitHub Release körs automatisk deployment:
+1. Uppdatera version i `app.json`
+2. Skapa release: `gh release create v1.0.0`
+3. GitHub Actions bygger och submitar till båda stores
+
+Se [GITHUB_SETUP_COMPLETE.md](GITHUB_SETUP_COMPLETE.md) för CI/CD setup.
 
 ## 🐛 Felsökning
 
