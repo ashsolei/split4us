@@ -1,0 +1,90 @@
+/**
+ * Root Stack Navigator
+ * 
+ * Main navigation stack för hela appen
+ */
+
+import React from 'react';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+// Import navigators & screens
+import Split4UsTabNavigator from './Split4UsTabNavigator';
+import GroupDetailScreen from '../screens/split4us/GroupDetailScreen';
+import CreateGroupScreen from '../screens/split4us/CreateGroupScreen';
+import CreateExpenseScreen from '../screens/split4us/CreateExpenseScreen';
+import ExpenseDetailScreen from '../screens/split4us/ExpenseDetailScreen';
+import BalancesScreen from '../screens/split4us/BalancesScreen';
+
+// Types
+import { RootStackParamList } from './types';
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+export default function RootStackNavigator() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: '#3B82F6',
+        },
+        headerTintColor: '#FFFFFF',
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
+      }}
+    >
+      {/* Main Tabs (no header, tabs have their own) */}
+      <Stack.Screen
+        name="MainTabs"
+        component={Split4UsTabNavigator}
+        options={{ headerShown: false }}
+      />
+      
+      {/* Modal Screens */}
+      <Stack.Screen
+        name="GroupDetail"
+        component={GroupDetailScreen}
+        options={({ route }) => ({
+          title: 'Group Details',
+          presentation: 'card',
+        })}
+      />
+      
+      <Stack.Screen
+        name="CreateGroup"
+        component={CreateGroupScreen}
+        options={{
+          title: 'Create Group',
+          presentation: 'modal',
+        }}
+      />
+      
+      <Stack.Screen
+        name="CreateExpense"
+        component={CreateExpenseScreen}
+        options={{
+          title: 'Add Expense',
+          presentation: 'modal',
+        }}
+      />
+      
+      <Stack.Screen
+        name="ExpenseDetail"
+        component={ExpenseDetailScreen}
+        options={{
+          title: 'Expense Details',
+          presentation: 'card',
+        }}
+      />
+      
+      <Stack.Screen
+        name="BalancesScreen"
+        component={BalancesScreen}
+        options={{
+          title: 'Balances',
+          presentation: 'card',
+        }}
+      />
+    </Stack.Navigator>
+  );
+}
