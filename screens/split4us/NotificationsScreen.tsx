@@ -8,7 +8,7 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
-import { supabase } from '../../lib/supabase/client';
+import { supabase } from '../../lib/supabase';
 
 interface Notification {
   id: string;

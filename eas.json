@@ -9,7 +9,7 @@
       "distribution": "internal",
       "ios": {
         "simulator": true,
-        "bundleIdentifier": "com.homeauto.mobile.dev"
+        "bundleIdentifier": "com.split4us.mobile.dev"
       },
       "android": {
         "buildType": "apk",
@@ -35,7 +35,7 @@
       "autoIncrement": true,
       "ios": {
         "buildConfiguration": "Release",
-        "bundleIdentifier": "com.homeauto.mobile"
+        "bundleIdentifier": "com.split4us.mobile"
       },
       "android": {
         "buildType": "aab"

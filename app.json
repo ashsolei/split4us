@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "HomeAuto",
-    "slug": "homeauto-mobile",
+    "name": "Split4Us",
+    "slug": "split4us-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -14,14 +14,14 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.homeauto.mobile"
+      "bundleIdentifier": "com.split4us.mobile"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#3b82f6"
       },
-      "package": "com.homeauto.mobile",
+      "package": "com.split4us.mobile",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
@@ -35,19 +35,22 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "The app accesses your photos to let you upload contract documents.",
-          "cameraPermission": "The app accesses your camera to let you take photos of contract documents."
+          "photosPermission": "The app accesses your photos to let you upload receipt images.",
+          "cameraPermission": "The app accesses your camera to let you take photos of receipts."
         }
       ],
       [
         "expo-document-picker"
       ]
     ],
-    "scheme": "homeauto",
+    "scheme": "split4us",
     "extra": {
       "eas": {
         "projectId": "your-project-id-here"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
     }
   }
 }
