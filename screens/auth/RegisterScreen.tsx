@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '../../types/navigation';
@@ -24,6 +25,7 @@ export default function RegisterScreen() {
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
   const navigation = useNavigation<RegisterScreenNavigationProp>();
+  const { colors } = useTheme();
 
   const handleRegister = async () => {
     if (!email || !password || !confirmPassword) {
@@ -59,15 +61,16 @@ export default function RegisterScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.surface }]}
     >
       <View style={styles.content}>
-        <Text style={styles.title}>Skapa konto</Text>
-        <Text style={styles.subtitle}>Registrera dig för att komma igång</Text>
+        <Text style={[styles.title, { color: colors.primary }]}>Skapa konto</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Registrera dig för att komma igång</Text>
 
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.inputBg, color: colors.text }]}
           placeholder="E-post"
+          placeholderTextColor={colors.textTertiary}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -76,8 +79,9 @@ export default function RegisterScreen() {
         />
 
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.inputBg, color: colors.text }]}
           placeholder="Lösenord"
+          placeholderTextColor={colors.textTertiary}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -85,8 +89,9 @@ export default function RegisterScreen() {
         />
 
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.inputBg, color: colors.text }]}
           placeholder="Bekräfta lösenord"
+          placeholderTextColor={colors.textTertiary}
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry
@@ -94,7 +99,7 @@ export default function RegisterScreen() {
         />
 
         <TouchableOpacity
-          style={styles.button}
+          style={[styles.button, { backgroundColor: colors.primary }]}
           onPress={handleRegister}
           disabled={loading}
         >
@@ -106,9 +111,9 @@ export default function RegisterScreen() {
         </TouchableOpacity>
 
         <View style={styles.loginContainer}>
-          <Text style={styles.loginText}>Har du redan ett konto? </Text>
+          <Text style={[styles.loginText, { color: colors.textSecondary }]}>Har du redan ett konto? </Text>
           <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-            <Text style={styles.loginLink}>Logga in</Text>
+            <Text style={[styles.loginLink, { color: colors.primary }]}>Logga in</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -119,7 +124,6 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   content: {
     flex: 1,
@@ -131,23 +135,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 8,
     textAlign: 'center',
-    color: '#3b82f6',
   },
   subtitle: {
     fontSize: 16,
-    color: '#6b7280',
     marginBottom: 32,
     textAlign: 'center',
   },
   input: {
-    backgroundColor: '#f3f4f6',
     padding: 16,
     borderRadius: 8,
     marginBottom: 16,
     fontSize: 16,
   },
   button: {
-    backgroundColor: '#3b82f6',
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
@@ -164,11 +164,9 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   loginText: {
-    color: '#6b7280',
     fontSize: 14,
   },
   loginLink: {
-    color: '#3b82f6',
     fontSize: 14,
     fontWeight: '600',
   },

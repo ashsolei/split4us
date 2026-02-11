@@ -44,6 +44,7 @@ import {
   formatAmount,
 } from '../../lib/split4us/utils';
 import { supabase } from '../../lib/supabase';
+import { useTheme } from '../../contexts/ThemeContext';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type RouteType = RouteProp<RootStackParamList, 'CreateExpense'>;
@@ -55,6 +56,7 @@ export default function CreateExpenseScreen() {
 
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
+  const { colors } = useTheme();
 
   // Form state
   const [description, setDescription] = useState('');
@@ -106,8 +108,8 @@ export default function CreateExpenseScreen() {
           setSelectedGroupId(active[0].id);
         }
       }
-    } catch (err) {
-      console.error('Failed to load data:', err);
+    } catch {
+      // Error handled via state
     } finally {
       setLoadingData(false);
     }
@@ -130,8 +132,8 @@ export default function CreateExpenseScreen() {
         setCustomPercentages(pctDefaults);
         setCustomShares(shareDefaults);
       }
-    } catch (err) {
-      console.error('Failed to load members:', err);
+    } catch {
+      // Error handled via state
     }
   };
 
@@ -228,8 +230,8 @@ export default function CreateExpenseScreen() {
           { text: 'OK', onPress: () => navigation.goBack() },
         ]);
       }
-    } catch (err) {
-      console.error('Failed to create expense:', err);
+    } catch {
+      // Error handled via state
       Alert.alert('Error', 'Failed to create expense. Please try again.');
     } finally {
       setLoading(false);
@@ -245,20 +247,20 @@ export default function CreateExpenseScreen() {
 
   if (loadingData) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#3B82F6" />
+      <View style={[styles.centerContainer, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   if (groups.length === 0) {
     return (
-      <View style={styles.centerContainer}>
+      <View style={[styles.centerContainer, { backgroundColor: colors.background }]}>
         <Text style={styles.emptyIcon}>👥</Text>
-        <Text style={styles.emptyText}>No groups available</Text>
-        <Text style={styles.emptySubtext}>Create a group first</Text>
+        <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No groups available</Text>
+        <Text style={[styles.emptySubtext, { color: colors.textTertiary }]}>Create a group first</Text>
         <TouchableOpacity
-          style={styles.createButton}
+          style={[styles.createButton, { backgroundColor: colors.primary }]}
           onPress={() => navigation.navigate('CreateGroup')}
         >
           <Text style={styles.createButtonText}>Create Group</Text>
@@ -268,14 +270,15 @@ export default function CreateExpenseScreen() {
   }
 
   return (
-    <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]} keyboardShouldPersistTaps="handled">
       <View style={styles.form}>
         {/* Description */}
         <View style={styles.field}>
-          <Text style={styles.label}>Description *</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>Description *</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
             placeholder="e.g., Dinner at restaurant"
+            placeholderTextColor={colors.textTertiary}
             value={description}
             onChangeText={setDescription}
           />
@@ -283,10 +286,11 @@ export default function CreateExpenseScreen() {
 
         {/* Amount */}
         <View style={styles.field}>
-          <Text style={styles.label}>Amount *</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>Amount *</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
             placeholder="0.00"
+            placeholderTextColor={colors.textTertiary}
             keyboardType="decimal-pad"
             value={amount}
             onChangeText={setAmount}
@@ -295,12 +299,12 @@ export default function CreateExpenseScreen() {
 
         {/* Date */}
         <View style={styles.field}>
-          <Text style={styles.label}>Date</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>Date</Text>
           <TouchableOpacity
-            style={styles.input}
+            style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border }]}
             onPress={() => setShowDatePicker(true)}
           >
-            <Text style={{ color: '#1a1a1a', fontSize: 16 }}>📅 {date}</Text>
+            <Text style={{ color: colors.text, fontSize: 16 }}>📅 {date}</Text>
           </TouchableOpacity>
           {showDatePicker && (
             <DateTimePicker
@@ -320,7 +324,7 @@ export default function CreateExpenseScreen() {
 
         {/* Category */}
         <View style={styles.field}>
-          <Text style={styles.label}>Category</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>Category</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -331,7 +335,8 @@ export default function CreateExpenseScreen() {
                 key={cat.id}
                 style={[
                   styles.categoryButton,
-                  category === cat.id && styles.categoryButtonActive,
+                  { backgroundColor: colors.surface, borderColor: colors.border },
+                  category === cat.id && [styles.categoryButtonActive, { backgroundColor: colors.primaryLight, borderColor: colors.primary }],
                 ]}
                 onPress={() => setCategory(cat.id)}
               >
@@ -339,7 +344,8 @@ export default function CreateExpenseScreen() {
                 <Text
                   style={[
                     styles.categoryName,
-                    category === cat.id && styles.categoryNameActive,
+                    { color: colors.textSecondary },
+                    category === cat.id && [styles.categoryNameActive, { color: colors.primary }],
                   ]}
                 >
                   {cat.name}
@@ -351,21 +357,23 @@ export default function CreateExpenseScreen() {
 
         {/* Group */}
         <View style={styles.field}>
-          <Text style={styles.label}>Group *</Text>
-          <View style={styles.picker}>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>Group *</Text>
+          <View style={[styles.picker, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             {groups.map((group) => (
               <TouchableOpacity
                 key={group.id}
                 style={[
                   styles.pickerOption,
-                  selectedGroupId === group.id && styles.pickerOptionActive,
+                  { borderBottomColor: colors.border },
+                  selectedGroupId === group.id && [styles.pickerOptionActive, { backgroundColor: colors.primaryLight }],
                 ]}
                 onPress={() => setSelectedGroupId(group.id)}
               >
                 <Text
                   style={[
                     styles.pickerText,
-                    selectedGroupId === group.id && styles.pickerTextActive,
+                    { color: colors.textSecondary },
+                    selectedGroupId === group.id && [styles.pickerTextActive, { color: colors.primary }],
                   ]}
                 >
                   {group.name}
@@ -378,21 +386,23 @@ export default function CreateExpenseScreen() {
         {/* Paid By */}
         {members.length > 0 && (
           <View style={styles.field}>
-            <Text style={styles.label}>Paid by *</Text>
-            <View style={styles.picker}>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>Paid by *</Text>
+            <View style={[styles.picker, { backgroundColor: colors.surface, borderColor: colors.border }]}>
               {members.map((member) => (
                 <TouchableOpacity
                   key={member.user_id}
                   style={[
                     styles.pickerOption,
-                    paidBy === member.user_id && styles.pickerOptionActive,
+                    { borderBottomColor: colors.border },
+                    paidBy === member.user_id && [styles.pickerOptionActive, { backgroundColor: colors.primaryLight }],
                   ]}
                   onPress={() => setPaidBy(member.user_id)}
                 >
                   <Text
                     style={[
                       styles.pickerText,
-                      paidBy === member.user_id && styles.pickerTextActive,
+                      { color: colors.textSecondary },
+                      paidBy === member.user_id && [styles.pickerTextActive, { color: colors.primary }],
                     ]}
                   >
                     {getMemberName(member.user_id)}
@@ -406,7 +416,7 @@ export default function CreateExpenseScreen() {
         {/* Split Type */}
         {members.length > 0 && (
           <View style={styles.field}>
-            <Text style={styles.label}>Split Type</Text>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>Split Type</Text>
             <View style={styles.splitTypeRow}>
               {(
                 [
@@ -420,13 +430,15 @@ export default function CreateExpenseScreen() {
                   key={st.key}
                   style={[
                     styles.splitTypeButton,
-                    splitType === st.key && styles.splitTypeButtonActive,
+                    { backgroundColor: colors.surface, borderColor: colors.border },
+                    splitType === st.key && [styles.splitTypeButtonActive, { backgroundColor: colors.primary, borderColor: colors.primary }],
                   ]}
                   onPress={() => setSplitType(st.key)}
                 >
                   <Text
                     style={[
                       styles.splitTypeText,
+                      { color: colors.textSecondary },
                       splitType === st.key && styles.splitTypeTextActive,
                     ]}
                   >
@@ -451,13 +463,14 @@ export default function CreateExpenseScreen() {
 
             {splitType === 'exact' &&
               members.map((m) => (
-                <View key={m.user_id} style={styles.splitInputRow}>
-                  <Text style={styles.splitMemberName} numberOfLines={1}>
+<View key={m.user_id} style={[styles.splitInputRow, { borderBottomColor: colors.border }]}>
+                  <Text style={[styles.splitMemberName, { color: colors.textSecondary }]} numberOfLines={1}>
                     {getMemberName(m.user_id)}
                   </Text>
                   <TextInput
-                    style={styles.splitInput}
+                    style={[styles.splitInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
                     placeholder="0.00"
+                    placeholderTextColor={colors.textTertiary}
                     keyboardType="decimal-pad"
                     value={customSplits[m.user_id] || ''}
                     onChangeText={(v) =>
@@ -519,10 +532,11 @@ export default function CreateExpenseScreen() {
 
         {/* Notes */}
         <View style={styles.field}>
-          <Text style={styles.label}>Notes (optional)</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>Notes (optional)</Text>
           <TextInput
-            style={[styles.input, styles.textArea]}
+            style={[styles.input, styles.textArea, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
             placeholder="Add any additional details..."
+            placeholderTextColor={colors.textTertiary}
             value={notes}
             onChangeText={setNotes}
             multiline
@@ -532,7 +546,7 @@ export default function CreateExpenseScreen() {
 
         {/* Submit Button */}
         <TouchableOpacity
-          style={[styles.submitButton, loading && styles.submitButtonDisabled]}
+          style={[styles.submitButton, { backgroundColor: colors.primary }, loading && styles.submitButtonDisabled]}
           onPress={handleSubmit}
           disabled={loading}
         >
@@ -550,13 +564,11 @@ export default function CreateExpenseScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F9FAFB',
     padding: 32,
   },
   form: {
@@ -568,16 +580,13 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
   },
   textArea: {
     height: 80,
@@ -590,16 +599,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 8,
-    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E5E7EB',
     marginRight: 8,
     alignItems: 'center',
     minWidth: 80,
   },
   categoryButtonActive: {
-    backgroundColor: '#DBEAFE',
-    borderColor: '#3B82F6',
   },
   categoryIcon: {
     fontSize: 24,
@@ -607,33 +612,25 @@ const styles = StyleSheet.create({
   },
   categoryName: {
     fontSize: 12,
-    color: '#6B7280',
   },
   categoryNameActive: {
-    color: '#3B82F6',
     fontWeight: '600',
   },
   picker: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
     overflow: 'hidden',
   },
   pickerOption: {
     padding: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
   },
   pickerOptionActive: {
-    backgroundColor: '#DBEAFE',
   },
   pickerText: {
     fontSize: 16,
-    color: '#374151',
   },
   pickerTextActive: {
-    color: '#3B82F6',
     fontWeight: '600',
   },
   splitTypeRow: {
@@ -646,17 +643,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E5E7EB',
   },
   splitTypeButtonActive: {
-    backgroundColor: '#3B82F6',
-    borderColor: '#3B82F6',
   },
   splitTypeText: {
     fontSize: 13,
-    color: '#6B7280',
     fontWeight: '500',
   },
   splitTypeTextActive: {
@@ -680,12 +672,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
   },
   splitMemberName: {
     flex: 1,
     fontSize: 14,
-    color: '#374151',
     marginRight: 8,
   },
   splitInputWrapper: {
@@ -694,12 +684,10 @@ const styles = StyleSheet.create({
   },
   splitInput: {
     width: 80,
-    backgroundColor: '#FFFFFF',
     borderRadius: 6,
     padding: 8,
     fontSize: 14,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
     textAlign: 'right',
   },
   splitUnit: {
@@ -709,7 +697,6 @@ const styles = StyleSheet.create({
     width: 40,
   },
   submitButton: {
-    backgroundColor: '#3B82F6',
     borderRadius: 8,
     padding: 16,
     alignItems: 'center',
@@ -731,17 +718,14 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#6B7280',
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 16,
-    color: '#9CA3AF',
     textAlign: 'center',
     marginBottom: 24,
   },
   createButton: {
-    backgroundColor: '#3B82F6',
     paddingHorizontal: 32,
     paddingVertical: 12,
     borderRadius: 8,

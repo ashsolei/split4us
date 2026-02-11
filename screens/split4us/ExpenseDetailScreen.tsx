@@ -17,6 +17,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Linking,
+  TextInput,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -24,6 +26,7 @@ import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../types/navigation';
 import { expensesApi, Split4UsExpense } from '../../lib/split4us/api';
 import { formatAmount, formatDate, getCategoryById, getUserDisplayName } from '../../lib/split4us/utils';
+import { useTheme } from '../../contexts/ThemeContext';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type RouteType = RouteProp<RootStackParamList, 'ExpenseDetail'>;
@@ -36,6 +39,12 @@ export default function ExpenseDetailScreen() {
   const [expense, setExpense] = useState<Split4UsExpense | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [editDescription, setEditDescription] = useState('');
+  const [editAmount, setEditAmount] = useState('');
+  const [editNotes, setEditNotes] = useState('');
+  const [saving, setSaving] = useState(false);
+  const { colors } = useTheme();
 
   useEffect(() => {
     if (expenseId) {
@@ -53,8 +62,8 @@ export default function ExpenseDetailScreen() {
       } else if (result.data) {
         setExpense(result.data);
       }
-    } catch (err) {
-      console.error('Failed to load expense:', err);
+    } catch {
+      // Error handled via state
       setError('Failed to load expense');
     } finally {
       setLoading(false);
@@ -89,19 +98,63 @@ export default function ExpenseDetailScreen() {
     );
   };
 
+  const startEditing = () => {
+    if (!expense) return;
+    setEditDescription(expense.description);
+    setEditAmount(String(expense.amount));
+    setEditNotes(expense.notes || '');
+    setEditing(true);
+  };
+
+  const cancelEditing = () => {
+    setEditing(false);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editDescription.trim()) {
+      Alert.alert('Error', 'Description is required');
+      return;
+    }
+    const parsedAmount = parseFloat(editAmount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      Alert.alert('Error', 'Enter a valid amount');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const result = await expensesApi.update(expenseId, {
+        description: editDescription.trim(),
+        amount: parsedAmount,
+        notes: editNotes.trim() || undefined,
+      });
+      if (result.error) {
+        Alert.alert('Error', result.error);
+      } else {
+        setEditing(false);
+        await loadExpense();
+        Alert.alert('Success', 'Expense updated');
+      }
+    } catch {
+      Alert.alert('Error', 'Failed to update expense');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#3B82F6" />
+      <View style={[styles.centerContainer, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   if (error || !expense) {
     return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>❌ {error || 'Expense not found'}</Text>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.retryButton}>
+      <View style={[styles.centerContainer, { backgroundColor: colors.background }]}>
+        <Text style={[styles.errorText, { color: colors.error }]}>❌ {error || 'Expense not found'}</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.retryButton, { backgroundColor: colors.primary }]}>
           <Text style={styles.retryButtonText}>Go Back</Text>
         </TouchableOpacity>
       </View>
@@ -111,65 +164,65 @@ export default function ExpenseDetailScreen() {
   const category = getCategoryById(expense.category);
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.categoryIcon}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <View style={[styles.categoryIcon, { backgroundColor: colors.inputBg }]}>
           <Text style={styles.categoryEmoji}>{category.icon}</Text>
         </View>
-        <Text style={styles.description}>{expense.description}</Text>
-        <Text style={styles.amount}>
+        <Text style={[styles.description, { color: colors.text }]}>{expense.description}</Text>
+        <Text style={[styles.amount, { color: colors.primary }]}>
           {formatAmount(expense.amount, expense.currency)}
         </Text>
       </View>
 
       {/* Details */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Details</Text>
+      <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Details</Text>
         
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Category</Text>
+        <View style={[styles.detailRow, { borderBottomColor: colors.border }]}>
+          <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>Category</Text>
           <View style={styles.detailValue}>
             <Text style={styles.detailEmoji}>{category.icon}</Text>
-            <Text style={styles.detailText}>{category.name}</Text>
+            <Text style={[styles.detailText, { color: colors.text }]}>{category.name}</Text>
           </View>
         </View>
 
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Date</Text>
-          <Text style={styles.detailText}>{formatDate(expense.date)}</Text>
+        <View style={[styles.detailRow, { borderBottomColor: colors.border }]}>
+          <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>Date</Text>
+          <Text style={[styles.detailText, { color: colors.text }]}>{formatDate(expense.date)}</Text>
         </View>
 
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Paid by</Text>
-          <Text style={styles.detailText}>
+        <View style={[styles.detailRow, { borderBottomColor: colors.border }]}>
+          <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>Paid by</Text>
+          <Text style={[styles.detailText, { color: colors.text }]}>
             {getUserDisplayName(expense.paid_by_user)}
           </Text>
         </View>
 
         {expense.notes && (
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Notes</Text>
-            <Text style={styles.detailText}>{expense.notes}</Text>
+          <View style={[styles.detailRow, { borderBottomColor: colors.border }]}>
+            <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>Notes</Text>
+            <Text style={[styles.detailText, { color: colors.text }]}>{expense.notes}</Text>
           </View>
         )}
 
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Created</Text>
-          <Text style={styles.detailText}>{formatDate(expense.created_at)}</Text>
+        <View style={[styles.detailRow, { borderBottomColor: colors.border }]}>
+          <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>Created</Text>
+          <Text style={[styles.detailText, { color: colors.text }]}>{formatDate(expense.created_at)}</Text>
         </View>
       </View>
 
       {/* Split Breakdown */}
       {expense.splits && expense.splits.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Split ({expense.splits.length} people)</Text>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Split ({expense.splits.length} people)</Text>
           {expense.splits.map((split, index) => (
-            <View key={split.user_id || index} style={styles.splitRow}>
-              <Text style={styles.splitUser}>
+            <View key={split.user_id || index} style={[styles.splitRow, { borderBottomColor: colors.border }]}>
+              <Text style={[styles.splitUser, { color: colors.textSecondary }]}>
                 {getUserDisplayName({ email: split.user_id })}
               </Text>
-              <Text style={styles.splitAmount}>
+              <Text style={[styles.splitAmount, { color: colors.text }]}>
                 {formatAmount(split.amount, expense.currency)}
               </Text>
             </View>
@@ -179,31 +232,85 @@ export default function ExpenseDetailScreen() {
 
       {/* Receipt */}
       {expense.receipt_url && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Receipt</Text>
-          <TouchableOpacity style={styles.receiptButton}>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Receipt</Text>
+          <TouchableOpacity
+            style={[styles.receiptButton, { backgroundColor: colors.inputBg }]}
+            onPress={() => Linking.openURL(expense.receipt_url!)}
+          >
             <Text style={styles.receiptIcon}>📄</Text>
-            <Text style={styles.receiptText}>View Receipt</Text>
+            <Text style={[styles.receiptText, { color: colors.textSecondary }]}>View Receipt</Text>
           </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Edit Form */}
+      {editing && (
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Edit Expense</Text>
+          <View style={styles.editField}>
+            <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>Description</Text>
+            <TextInput
+              style={[styles.editInput, { backgroundColor: colors.inputBg, color: colors.text, borderColor: colors.border }]}
+              value={editDescription}
+              onChangeText={setEditDescription}
+            />
+          </View>
+          <View style={styles.editField}>
+            <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>Amount</Text>
+            <TextInput
+              style={[styles.editInput, { backgroundColor: colors.inputBg, color: colors.text, borderColor: colors.border }]}
+              value={editAmount}
+              onChangeText={setEditAmount}
+              keyboardType="decimal-pad"
+            />
+          </View>
+          <View style={styles.editField}>
+            <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>Notes</Text>
+            <TextInput
+              style={[styles.editInput, styles.editTextArea, { backgroundColor: colors.inputBg, color: colors.text, borderColor: colors.border }]}
+              value={editNotes}
+              onChangeText={setEditNotes}
+              multiline
+              numberOfLines={3}
+            />
+          </View>
+          <View style={styles.editActions}>
+            <TouchableOpacity
+              style={[styles.editCancelButton, { borderColor: colors.border }]}
+              onPress={cancelEditing}
+            >
+              <Text style={[styles.editCancelText, { color: colors.textSecondary }]}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.editSaveButton, { backgroundColor: colors.primary }]}
+              onPress={handleSaveEdit}
+              disabled={saving}
+            >
+              {saving ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <Text style={styles.editSaveText}>Save Changes</Text>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
       )}
 
       {/* Actions */}
       <View style={styles.actionsSection}>
         <TouchableOpacity
-          style={[styles.actionButton, styles.editButton]}
-          onPress={() => {
-            Alert.alert('Coming Soon', 'Edit feature coming soon!');
-          }}
+          style={[styles.actionButton, styles.editButton, { backgroundColor: colors.primaryLight, borderColor: colors.primary }]}
+          onPress={startEditing}
         >
-          <Text style={styles.editButtonText}>✏️ Edit Expense</Text>
+          <Text style={[styles.editButtonText, { color: colors.primary }]}>✏️ Edit Expense</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.actionButton, styles.deleteButton]}
+          style={[styles.actionButton, styles.deleteButton, { borderColor: colors.error }]}
           onPress={handleDelete}
         >
-          <Text style={styles.deleteButtonText}>🗑️ Delete Expense</Text>
+          <Text style={[styles.deleteButtonText, { color: colors.error }]}>🗑️ Delete Expense</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -213,26 +320,21 @@ export default function ExpenseDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F9FAFB',
   },
   header: {
-    backgroundColor: '#FFFFFF',
     padding: 24,
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
   },
   categoryIcon: {
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#F3F4F6',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
@@ -243,24 +345,20 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 24,
     fontWeight: '600',
-    color: '#111827',
     marginBottom: 8,
     textAlign: 'center',
   },
   amount: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#3B82F6',
   },
   section: {
-    backgroundColor: '#FFFFFF',
     marginTop: 12,
     padding: 16,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#111827',
     marginBottom: 16,
   },
   detailRow: {
@@ -269,11 +367,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
   },
   detailLabel: {
     fontSize: 14,
-    color: '#6B7280',
     fontWeight: '500',
   },
   detailValue: {
@@ -286,7 +382,6 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 16,
-    color: '#111827',
     fontWeight: '500',
     textAlign: 'right',
     flex: 1,
@@ -297,19 +392,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
   },
   splitUser: {
     fontSize: 16,
-    color: '#374151',
   },
   splitAmount: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
   },
   receiptButton: {
-    backgroundColor: '#F3F4F6',
     borderRadius: 8,
     padding: 16,
     flexDirection: 'row',
@@ -323,7 +414,6 @@ const styles = StyleSheet.create({
   receiptText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#374151',
   },
   actionsSection: {
     padding: 16,
@@ -337,37 +427,71 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   editButton: {
-    backgroundColor: '#DBEAFE',
     borderWidth: 1,
-    borderColor: '#3B82F6',
   },
   editButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1E40AF',
   },
   deleteButton: {
     backgroundColor: '#FEE2E2',
     borderWidth: 1,
-    borderColor: '#EF4444',
   },
   deleteButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#DC2626',
   },
   errorText: {
     fontSize: 16,
-    color: '#EF4444',
     marginBottom: 16,
   },
   retryButton: {
-    backgroundColor: '#3B82F6',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
   },
   retryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  editField: {
+    marginBottom: 16,
+  },
+  editInput: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    marginTop: 6,
+  },
+  editTextArea: {
+    height: 80,
+    textAlignVertical: 'top',
+  },
+  editActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+  },
+  editCancelButton: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 14,
+    alignItems: 'center',
+  },
+  editCancelText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  editSaveButton: {
+    flex: 1,
+    borderRadius: 8,
+    padding: 14,
+    alignItems: 'center',
+  },
+  editSaveText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',

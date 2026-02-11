@@ -18,7 +18,7 @@ const ExpoSecureStoreAdapter = {
     try {
       return await SecureStore.getItemAsync(key);
     } catch {
-      console.warn('SecureStore getItem failed for key:', key);
+      // SecureStore getItem failed
       return null;
     }
   },
@@ -26,14 +26,14 @@ const ExpoSecureStoreAdapter = {
     try {
       await SecureStore.setItemAsync(key, value);
     } catch {
-      console.warn('SecureStore setItem failed for key:', key);
+      // SecureStore setItem failed
     }
   },
   removeItem: async (key: string): Promise<void> => {
     try {
       await SecureStore.deleteItemAsync(key);
     } catch {
-      console.warn('SecureStore removeItem failed for key:', key);
+      // SecureStore removeItem failed
     }
   },
 };

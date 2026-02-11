@@ -104,7 +104,7 @@ async function apiRequest<T>(
       apiError.code = 'TIMEOUT';
     }
 
-    console.error(`API request failed: ${endpoint}`, apiError);
+    console.error('API request failed', apiError);
     return { error: apiError.message };
   }
 }
@@ -371,7 +371,7 @@ export interface Notification {
   type: string;
   title: string;
   message: string;
-  data: any;
+  data: Record<string, string | number | boolean | null> | null;
   read: boolean;
   created_at: string;
 }

@@ -28,7 +28,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function SettingsScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const { isDark, setMode } = useTheme();
+  const { colors, isDark, setMode } = useTheme();
   const [user, setUser] = useState<{ id: string; email?: string; user_metadata?: Record<string, string> } | null>(null);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(true);
@@ -61,154 +61,154 @@ export default function SettingsScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Profile Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Profile</Text>
+      <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Profile</Text>
         
-        <View style={styles.profileCard}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
+        <View style={[styles.profileCard, { borderBottomColor: colors.border }]}>
+          <View style={[styles.avatar, { backgroundColor: colors.primaryLight }]}>
+            <Text style={[styles.avatarText, { color: colors.primary }]}>
               {user?.email?.substring(0, 2).toUpperCase() || '??'}
             </Text>
           </View>
           <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>
+            <Text style={[styles.profileName, { color: colors.text }]}>
               {user?.user_metadata?.full_name || 'User'}
             </Text>
-            <Text style={styles.profileEmail}>{user?.email || 'No email'}</Text>
+            <Text style={[styles.profileEmail, { color: colors.textSecondary }]}>{user?.email || 'No email'}</Text>
           </View>
         </View>
 
         <TouchableOpacity
-          style={styles.settingRow}
+          style={[styles.settingRow, { borderBottomColor: colors.border }]}
           onPress={() => Alert.alert('Coming Soon', 'Edit profile coming soon!')}
         >
-          <Text style={styles.settingLabel}>Edit Profile</Text>
-          <Text style={styles.settingArrow}>›</Text>
+          <Text style={[styles.settingLabel, { color: colors.text }]}>Edit Profile</Text>
+          <Text style={[styles.settingArrow, { color: colors.textTertiary }]}>›</Text>
         </TouchableOpacity>
       </View>
 
       {/* Notifications Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Notifications</Text>
+      <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Notifications</Text>
 
-        <View style={styles.settingRow}>
+        <View style={[styles.settingRow, { borderBottomColor: colors.border }]}>
           <View style={styles.settingInfo}>
-            <Text style={styles.settingLabel}>Email Notifications</Text>
-            <Text style={styles.settingDescription}>
+            <Text style={[styles.settingLabel, { color: colors.text }]}>Email Notifications</Text>
+            <Text style={[styles.settingDescription, { color: colors.textSecondary }]}>
               Receive email updates about expenses and settlements
             </Text>
           </View>
           <Switch
             value={emailNotifications}
             onValueChange={setEmailNotifications}
-            trackColor={{ false: '#E5E7EB', true: '#93C5FD' }}
-            thumbColor={emailNotifications ? '#3B82F6' : '#F3F4F6'}
+            trackColor={{ false: colors.border, true: '#93C5FD' }}
+            thumbColor={emailNotifications ? colors.primary : colors.inputBg}
           />
         </View>
 
-        <View style={styles.settingRow}>
+        <View style={[styles.settingRow, { borderBottomColor: colors.border }]}>
           <View style={styles.settingInfo}>
-            <Text style={styles.settingLabel}>Push Notifications</Text>
-            <Text style={styles.settingDescription}>
+            <Text style={[styles.settingLabel, { color: colors.text }]}>Push Notifications</Text>
+            <Text style={[styles.settingDescription, { color: colors.textSecondary }]}>
               Get instant alerts on your device
             </Text>
           </View>
           <Switch
             value={pushNotifications}
             onValueChange={setPushNotifications}
-            trackColor={{ false: '#E5E7EB', true: '#93C5FD' }}
-            thumbColor={pushNotifications ? '#3B82F6' : '#F3F4F6'}
+            trackColor={{ false: colors.border, true: '#93C5FD' }}
+            thumbColor={pushNotifications ? colors.primary : colors.inputBg}
           />
         </View>
       </View>
 
       {/* Preferences Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Preferences</Text>
+      <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Preferences</Text>
 
         <TouchableOpacity
-          style={styles.settingRow}
+          style={[styles.settingRow, { borderBottomColor: colors.border }]}
           onPress={() => Alert.alert('Coming Soon', 'Currency settings coming soon!')}
         >
-          <Text style={styles.settingLabel}>Default Currency</Text>
+          <Text style={[styles.settingLabel, { color: colors.text }]}>Default Currency</Text>
           <View style={styles.settingValue}>
-            <Text style={styles.settingValueText}>SEK</Text>
-            <Text style={styles.settingArrow}>›</Text>
+            <Text style={[styles.settingValueText, { color: colors.textSecondary }]}>SEK</Text>
+            <Text style={[styles.settingArrow, { color: colors.textTertiary }]}>›</Text>
           </View>
         </TouchableOpacity>
 
-        <View style={styles.settingRow}>
+        <View style={[styles.settingRow, { borderBottomColor: colors.border }]}>
           <View style={styles.settingInfo}>
-            <Text style={styles.settingLabel}>Dark Mode</Text>
-            <Text style={styles.settingDescription}>
+            <Text style={[styles.settingLabel, { color: colors.text }]}>Dark Mode</Text>
+            <Text style={[styles.settingDescription, { color: colors.textSecondary }]}>
               Use dark theme throughout the app
             </Text>
           </View>
           <Switch
             value={isDark}
             onValueChange={(val) => setMode(val ? 'dark' : 'light')}
-            trackColor={{ false: '#E5E7EB', true: '#93C5FD' }}
-            thumbColor={isDark ? '#3B82F6' : '#F3F4F6'}
+            trackColor={{ false: colors.border, true: '#93C5FD' }}
+            thumbColor={isDark ? colors.primary : colors.inputBg}
           />
         </View>
       </View>
 
       {/* About Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>About</Text>
+      <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>About</Text>
 
         <TouchableOpacity
-          style={styles.settingRow}
-          onPress={() => Alert.alert('Split4Us', 'Version 1.1.0\n\nExpense sharing made easy!')}
+          style={[styles.settingRow, { borderBottomColor: colors.border }]}
+          onPress={() => Alert.alert('Split4Us', 'Version 1.3.0\n\nExpense sharing made easy!')}
         >
-          <Text style={styles.settingLabel}>App Version</Text>
-          <Text style={styles.settingValueText}>1.1.0</Text>
+          <Text style={[styles.settingLabel, { color: colors.text }]}>App Version</Text>
+          <Text style={[styles.settingValueText, { color: colors.textSecondary }]}>1.3.0</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.settingRow}
+          style={[styles.settingRow, { borderBottomColor: colors.border }]}
           onPress={() => Alert.alert('Coming Soon', 'Help center coming soon!')}
         >
-          <Text style={styles.settingLabel}>Help & Support</Text>
-          <Text style={styles.settingArrow}>›</Text>
+          <Text style={[styles.settingLabel, { color: colors.text }]}>Help & Support</Text>
+          <Text style={[styles.settingArrow, { color: colors.textTertiary }]}>›</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.settingRow}
+          style={[styles.settingRow, { borderBottomColor: colors.border }]}
           onPress={() => Alert.alert('Coming Soon', 'Terms of service coming soon!')}
         >
-          <Text style={styles.settingLabel}>Terms of Service</Text>
-          <Text style={styles.settingArrow}>›</Text>
+          <Text style={[styles.settingLabel, { color: colors.text }]}>Terms of Service</Text>
+          <Text style={[styles.settingArrow, { color: colors.textTertiary }]}>›</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.settingRow}
+          style={[styles.settingRow, { borderBottomColor: colors.border }]}
           onPress={() => Alert.alert('Coming Soon', 'Privacy policy coming soon!')}
         >
-          <Text style={styles.settingLabel}>Privacy Policy</Text>
-          <Text style={styles.settingArrow}>›</Text>
+          <Text style={[styles.settingLabel, { color: colors.text }]}>Privacy Policy</Text>
+          <Text style={[styles.settingArrow, { color: colors.textTertiary }]}>›</Text>
         </TouchableOpacity>
       </View>
 
       {/* Sign Out */}
-      <View style={styles.section}>
+      <View style={[styles.section, { backgroundColor: colors.surface }]}>
         <TouchableOpacity
-          style={styles.signOutButton}
+          style={[styles.signOutButton, { borderColor: colors.error }]}
           onPress={handleSignOut}
         >
-          <Text style={styles.signOutText}>Sign Out</Text>
+          <Text style={[styles.signOutText, { color: colors.error }]}>Sign Out</Text>
         </TouchableOpacity>
       </View>
 
       {/* Footer */}
       <View style={styles.footer}>
-        <Text style={styles.footerText}>
+        <Text style={[styles.footerText, { color: colors.textTertiary }]}>
           Made with ❤️ for expense sharing
         </Text>
-        <Text style={styles.footerText}>
-          © 2025 Split4Us
+        <Text style={[styles.footerText, { color: colors.textTertiary }]}>
+          © 2026 Split4Us
         </Text>
       </View>
     </ScrollView>
@@ -218,10 +218,8 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
   },
   section: {
-    backgroundColor: '#FFFFFF',
     marginTop: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -229,7 +227,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6B7280',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 12,
@@ -240,13 +237,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     marginBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
   },
   avatar: {
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#DBEAFE',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
@@ -254,7 +249,6 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#3B82F6',
   },
   profileInfo: {
     flex: 1,
@@ -262,12 +256,10 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#111827',
     marginBottom: 4,
   },
   profileEmail: {
     fontSize: 14,
-    color: '#6B7280',
   },
   settingRow: {
     flexDirection: 'row',
@@ -275,7 +267,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
   },
   settingInfo: {
     flex: 1,
@@ -283,13 +274,11 @@ const styles = StyleSheet.create({
   },
   settingLabel: {
     fontSize: 16,
-    color: '#111827',
     fontWeight: '500',
     marginBottom: 2,
   },
   settingDescription: {
     fontSize: 13,
-    color: '#6B7280',
     lineHeight: 18,
   },
   settingValue: {
@@ -298,12 +287,10 @@ const styles = StyleSheet.create({
   },
   settingValueText: {
     fontSize: 16,
-    color: '#6B7280',
     marginRight: 4,
   },
   settingArrow: {
     fontSize: 24,
-    color: '#9CA3AF',
     fontWeight: '300',
   },
   signOutButton: {
@@ -313,12 +300,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: 12,
     borderWidth: 1,
-    borderColor: '#EF4444',
   },
   signOutText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#DC2626',
   },
   footer: {
     padding: 32,
@@ -326,7 +311,6 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 12,
-    color: '#9CA3AF',
     marginBottom: 4,
   },
 });

@@ -23,6 +23,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types/navigation';
 import { expensesApi, Split4UsExpense } from '../../lib/split4us/api';
 import { formatAmount, formatRelativeTime, getCategoryById, getUserDisplayName } from '../../lib/split4us/utils';
+import { useTheme } from '../../contexts/ThemeContext';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -34,6 +35,7 @@ export default function ExpensesScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const { colors } = useTheme();
 
   useEffect(() => {
     loadExpenses();
@@ -69,8 +71,8 @@ export default function ExpensesScreen() {
         setExpenses(sorted);
         setFilteredExpenses(sorted);
       }
-    } catch (err) {
-      console.error('Failed to load expenses:', err);
+    } catch {
+      // Error handled via state
       setError('Failed to load expenses');
     } finally {
       setLoading(false);
@@ -103,23 +105,23 @@ export default function ExpensesScreen() {
     return (
       <TouchableOpacity
         key={expense.id}
-        style={styles.expenseCard}
+        style={[styles.expenseCard, { backgroundColor: colors.card }]}
         onPress={() => navigation.navigate('ExpenseDetail', { expenseId: expense.id })}
       >
-        <View style={styles.expenseIcon}>
+        <View style={[styles.expenseIcon, { backgroundColor: colors.inputBg }]}>
           <Text style={styles.categoryEmoji}>{category.icon}</Text>
         </View>
         <View style={styles.expenseInfo}>
-          <Text style={styles.expenseDescription}>{expense.description}</Text>
-          <Text style={styles.expenseDate}>
+          <Text style={[styles.expenseDescription, { color: colors.text }]}>{expense.description}</Text>
+          <Text style={[styles.expenseDate, { color: colors.textTertiary }]}>
             {getUserDisplayName(expense.paid_by_user)} · {formatRelativeTime(expense.date)}
           </Text>
         </View>
         <View style={styles.expenseAmount}>
-          <Text style={styles.expenseAmountText}>
+          <Text style={[styles.expenseAmountText, { color: colors.text }]}>
             {formatAmount(expense.amount, expense.currency)}
           </Text>
-          <Text style={styles.categoryName}>{category.name}</Text>
+          <Text style={[styles.categoryName, { color: colors.textSecondary }]}>{category.name}</Text>
         </View>
       </TouchableOpacity>
     );
@@ -127,61 +129,62 @@ export default function ExpensesScreen() {
 
   if (loading) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#3B82F6" />
+      <View style={[styles.centerContainer, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Search Bar */}
-      <View style={styles.searchContainer}>
+      <View style={[styles.searchContainer, { backgroundColor: colors.surface }]}>
         <Text style={styles.searchIcon}>🔍</Text>
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { color: colors.text }]}
           placeholder="Search expenses..."
+          placeholderTextColor={colors.textTertiary}
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
         {searchQuery.length > 0 && (
           <TouchableOpacity onPress={() => setSearchQuery('')}>
-            <Text style={styles.clearIcon}>✕</Text>
+            <Text style={[styles.clearIcon, { color: colors.textTertiary }]}>✕</Text>
           </TouchableOpacity>
         )}
       </View>
 
       {/* Stats */}
       <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <Text style={styles.statValue}>{filteredExpenses.length}</Text>
-          <Text style={styles.statLabel}>Expenses</Text>
+        <View style={[styles.statCard, { backgroundColor: colors.card }]}>
+          <Text style={[styles.statValue, { color: colors.text }]}>{filteredExpenses.length}</Text>
+          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Expenses</Text>
         </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statValue}>
+        <View style={[styles.statCard, { backgroundColor: colors.card }]}>
+          <Text style={[styles.statValue, { color: colors.text }]}>
             {formatAmount(
               filteredExpenses.reduce((sum, e) => sum + e.amount, 0)
             )}
           </Text>
-          <Text style={styles.statLabel}>Total</Text>
+          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Total</Text>
         </View>
       </View>
 
       {/* Expenses List */}
       {error ? (
         <View style={styles.centerContainer}>
-          <Text style={styles.errorText}>❌ {error}</Text>
-          <TouchableOpacity onPress={loadExpenses} style={styles.retryButton}>
+          <Text style={[styles.errorText, { color: colors.error }]}>❌ {error}</Text>
+          <TouchableOpacity onPress={loadExpenses} style={[styles.retryButton, { backgroundColor: colors.primary }]}>
             <Text style={styles.retryButtonText}>Retry</Text>
           </TouchableOpacity>
         </View>
       ) : filteredExpenses.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyIcon}>📝</Text>
-          <Text style={styles.emptyText}>
+          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
             {searchQuery ? 'No expenses found' : 'No expenses yet'}
           </Text>
-          <Text style={styles.emptySubtext}>
+          <Text style={[styles.emptySubtext, { color: colors.textTertiary }]}>
             {searchQuery ? 'Try a different search' : 'Add your first expense to get started'}
           </Text>
         </View>
@@ -194,7 +197,7 @@ export default function ExpensesScreen() {
           }
           renderItem={({ item }) => (
             <View style={styles.section}>
-              <Text style={styles.dateHeader}>{item.date}</Text>
+              <Text style={[styles.dateHeader, { color: colors.textSecondary }]}>{item.date}</Text>
               {item.data.map(renderExpenseCard)}
             </View>
           )}
@@ -205,7 +208,7 @@ export default function ExpensesScreen() {
       {/* Floating Action Button */}
       {expenses.length > 0 && (
         <TouchableOpacity
-          style={styles.fab}
+          style={[styles.fab, { backgroundColor: colors.primary }]}
           onPress={() => navigation.navigate('CreateExpense', {})}
         >
           <Text style={styles.fabIcon}>+</Text>
@@ -218,7 +221,6 @@ export default function ExpensesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
   },
   centerContainer: {
     flex: 1,
@@ -228,7 +230,6 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
     margin: 16,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -246,11 +247,9 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: '#111827',
   },
   clearIcon: {
     fontSize: 20,
-    color: '#9CA3AF',
     paddingHorizontal: 8,
   },
   statsContainer: {
@@ -261,7 +260,6 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
@@ -274,12 +272,10 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#111827',
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: '#6B7280',
   },
   listContent: {
     paddingHorizontal: 16,
@@ -291,11 +287,9 @@ const styles = StyleSheet.create({
   dateHeader: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6B7280',
     marginBottom: 12,
   },
   expenseCard: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 12,
     marginBottom: 8,
@@ -311,7 +305,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#F3F4F6',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -325,12 +318,10 @@ const styles = StyleSheet.create({
   expenseDescription: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#111827',
     marginBottom: 2,
   },
   expenseDate: {
     fontSize: 12,
-    color: '#9CA3AF',
   },
   expenseAmount: {
     alignItems: 'flex-end',
@@ -339,12 +330,10 @@ const styles = StyleSheet.create({
   expenseAmountText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
     marginBottom: 2,
   },
   categoryName: {
     fontSize: 11,
-    color: '#6B7280',
   },
   emptyContainer: {
     flex: 1,
@@ -359,12 +348,10 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#6B7280',
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 16,
-    color: '#9CA3AF',
     textAlign: 'center',
   },
   fab: {
@@ -374,7 +361,6 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#3B82F6',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
@@ -390,11 +376,9 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: '#EF4444',
     marginBottom: 16,
   },
   retryButton: {
-    backgroundColor: '#3B82F6',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,

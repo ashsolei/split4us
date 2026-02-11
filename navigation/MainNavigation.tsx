@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useAuth } from '../contexts/AuthContext';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { AuthStackParamList } from '../types/navigation';
+import { useTheme } from '../contexts/ThemeContext';
 
 // Auth screens
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -31,11 +32,12 @@ const AuthNavigator = () => {
 
 export default function MainNavigation() {
   const { user, loading } = useAuth();
+  const { colors } = useTheme();
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }

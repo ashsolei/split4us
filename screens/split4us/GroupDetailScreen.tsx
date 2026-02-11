@@ -18,6 +18,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   Alert,
+  TextInput,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -26,6 +27,7 @@ import type { RootStackParamList } from '../../types/navigation';
 import { groupsApi, membersApi, expensesApi, Split4UsGroup, GroupMember, Split4UsExpense } from '../../lib/split4us/api';
 import { formatAmount, formatRelativeTime, getCategoryById, getUserDisplayName } from '../../lib/split4us/utils';
 import { shareExpensesCSV } from '../../lib/split4us/export';
+import { useTheme } from '../../contexts/ThemeContext';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type RouteType = RouteProp<RootStackParamList, 'GroupDetail'>;
@@ -41,6 +43,10 @@ export default function GroupDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showAddMember, setShowAddMember] = useState(false);
+  const [newMemberEmail, setNewMemberEmail] = useState('');
+  const [addingMember, setAddingMember] = useState(false);
+  const { colors } = useTheme();
 
   useEffect(() => {
     if (groupId) {
@@ -75,8 +81,8 @@ export default function GroupDetailScreen() {
         );
         setExpenses(sorted);
       }
-    } catch (err) {
-      console.error('Failed to load group:', err);
+    } catch {
+      // Error handled via state
       setError('Failed to load group data');
     } finally {
       setLoading(false);
@@ -87,6 +93,36 @@ export default function GroupDetailScreen() {
   const onRefresh = () => {
     setRefreshing(true);
     loadGroupData();
+  };
+
+  const handleAddMember = async () => {
+    const email = newMemberEmail.trim().toLowerCase();
+    if (!email) {
+      Alert.alert('Error', 'Please enter an email address');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert('Error', 'Please enter a valid email address');
+      return;
+    }
+
+    setAddingMember(true);
+    try {
+      const result = await membersApi.add(groupId, email);
+      if (result.error) {
+        Alert.alert('Error', result.error);
+      } else {
+        setNewMemberEmail('');
+        setShowAddMember(false);
+        Alert.alert('Success', `Invitation sent to ${email}`);
+        await loadGroupData();
+      }
+    } catch {
+      Alert.alert('Error', 'Failed to add member');
+    } finally {
+      setAddingMember(false);
+    }
   };
 
   const handleDeleteGroup = () => {
@@ -119,17 +155,17 @@ export default function GroupDetailScreen() {
 
   if (loading) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#3B82F6" />
+      <View style={[styles.centerContainer, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   if (error || !group) {
     return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>❌ {error || 'Group not found'}</Text>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.retryButton}>
+      <View style={[styles.centerContainer, { backgroundColor: colors.background }]}>
+        <Text style={[styles.errorText, { color: colors.error }]}>❌ {error || 'Group not found'}</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.retryButton, { backgroundColor: colors.primary }]}>
           <Text style={styles.retryButtonText}>Go Back</Text>
         </TouchableOpacity>
       </View>
@@ -138,30 +174,30 @@ export default function GroupDetailScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
       {/* Group Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.headerBg }]}>
         <View style={styles.headerContent}>
-          <Text style={styles.groupName}>{group.name}</Text>
+          <Text style={[styles.groupName, { color: colors.headerText }]}>{group.name}</Text>
           {group.description && (
-            <Text style={styles.groupDescription}>{group.description}</Text>
+            <Text style={[styles.groupDescription, { color: colors.headerText, opacity: 0.8 }]}>{group.description}</Text>
           )}
           <View style={styles.headerStats}>
             <View style={styles.headerStat}>
-              <Text style={styles.headerStatLabel}>Members</Text>
-              <Text style={styles.headerStatValue}>{members.length}</Text>
+              <Text style={[styles.headerStatLabel, { color: colors.headerText, opacity: 0.8 }]}>Members</Text>
+              <Text style={[styles.headerStatValue, { color: colors.headerText }]}>{members.length}</Text>
             </View>
             <View style={styles.headerStat}>
-              <Text style={styles.headerStatLabel}>Expenses</Text>
-              <Text style={styles.headerStatValue}>{expenses.length}</Text>
+              <Text style={[styles.headerStatLabel, { color: colors.headerText, opacity: 0.8 }]}>Expenses</Text>
+              <Text style={[styles.headerStatValue, { color: colors.headerText }]}>{expenses.length}</Text>
             </View>
             <View style={styles.headerStat}>
-              <Text style={styles.headerStatLabel}>Currency</Text>
-              <Text style={styles.headerStatValue}>{group.currency}</Text>
+              <Text style={[styles.headerStatLabel, { color: colors.headerText, opacity: 0.8 }]}>Currency</Text>
+              <Text style={[styles.headerStatValue, { color: colors.headerText }]}>{group.currency}</Text>
             </View>
           </View>
         </View>
@@ -170,7 +206,7 @@ export default function GroupDetailScreen() {
       {/* Quick Actions */}
       <View style={styles.actionsContainer}>
         <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: '#3B82F6' }]}
+          style={[styles.actionButton, { backgroundColor: colors.primary }]}
           onPress={() => navigation.navigate('CreateExpense', { groupId })}
         >
           <Text style={styles.actionIcon}>➕</Text>
@@ -178,7 +214,7 @@ export default function GroupDetailScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: '#10B981' }]}
+          style={[styles.actionButton, { backgroundColor: colors.success }]}
           onPress={() => navigation.navigate('BalancesScreen', { groupId })}
         >
           <Text style={styles.actionIcon}>💰</Text>
@@ -203,25 +239,50 @@ export default function GroupDetailScreen() {
       {/* Members Section */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Members ({members.length})</Text>
-          <TouchableOpacity onPress={() => {
-            Alert.alert('Coming Soon', 'Add member feature coming soon!');
-          }}>
-            <Text style={styles.addButton}>+ Add</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Members ({members.length})</Text>
+          <TouchableOpacity onPress={() => setShowAddMember(!showAddMember)}>
+            <Text style={[styles.addButton, { color: colors.primary }]}>{showAddMember ? 'Cancel' : '+ Add'}</Text>
           </TouchableOpacity>
         </View>
+
+        {showAddMember && (
+          <View style={[styles.addMemberForm, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <TextInput
+              style={[styles.addMemberInput, { backgroundColor: colors.inputBg, color: colors.text, borderColor: colors.border }]}
+              placeholder="Enter email address"
+              placeholderTextColor={colors.textTertiary}
+              value={newMemberEmail}
+              onChangeText={setNewMemberEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              autoComplete="email"
+            />
+            <TouchableOpacity
+              style={[styles.addMemberButton, { backgroundColor: colors.primary }]}
+              onPress={handleAddMember}
+              disabled={addingMember}
+            >
+              {addingMember ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <Text style={styles.addMemberButtonText}>Add Member</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        )}
+
         {members.map((member) => (
-          <View key={member.user_id} style={styles.memberCard}>
-            <View style={styles.memberAvatar}>
-              <Text style={styles.memberAvatarText}>
+          <View key={member.user_id} style={[styles.memberCard, { backgroundColor: colors.card }]}>
+            <View style={[styles.memberAvatar, { backgroundColor: colors.primaryLight }]}>
+              <Text style={[styles.memberAvatarText, { color: colors.primary }]}>
                 {getUserDisplayName(member.user).substring(0, 2).toUpperCase()}
               </Text>
             </View>
             <View style={styles.memberInfo}>
-              <Text style={styles.memberName}>
+              <Text style={[styles.memberName, { color: colors.text }]}>
                 {getUserDisplayName(member.user)}
               </Text>
-              <Text style={styles.memberRole}>{member.role}</Text>
+              <Text style={[styles.memberRole, { color: colors.textSecondary }]}>{member.role}</Text>
             </View>
           </View>
         ))}
@@ -229,12 +290,12 @@ export default function GroupDetailScreen() {
 
       {/* Expenses Section */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Expenses ({expenses.length})</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Expenses ({expenses.length})</Text>
         {expenses.length === 0 ? (
-          <View style={styles.emptyState}>
+          <View style={[styles.emptyState, { backgroundColor: colors.card }]}>
             <Text style={styles.emptyIcon}>📝</Text>
-            <Text style={styles.emptyText}>No expenses yet</Text>
-            <Text style={styles.emptySubtext}>Add your first expense to this group</Text>
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No expenses yet</Text>
+            <Text style={[styles.emptySubtext, { color: colors.textTertiary }]}>Add your first expense to this group</Text>
           </View>
         ) : (
           expenses.map((expense) => {
@@ -242,20 +303,20 @@ export default function GroupDetailScreen() {
             return (
               <TouchableOpacity
                 key={expense.id}
-                style={styles.expenseCard}
+                style={[styles.expenseCard, { backgroundColor: colors.card }]}
                 onPress={() => navigation.navigate('ExpenseDetail', { expenseId: expense.id })}
               >
-                <View style={styles.expenseIcon}>
+                <View style={[styles.expenseIcon, { backgroundColor: colors.inputBg }]}>
                   <Text style={styles.categoryEmoji}>{category.icon}</Text>
                 </View>
                 <View style={styles.expenseInfo}>
-                  <Text style={styles.expenseDescription}>{expense.description}</Text>
-                  <Text style={styles.expenseDate}>
+                  <Text style={[styles.expenseDescription, { color: colors.text }]}>{expense.description}</Text>
+                  <Text style={[styles.expenseDate, { color: colors.textTertiary }]}>
                     {formatRelativeTime(expense.date)} · {getUserDisplayName(expense.paid_by_user)}
                   </Text>
                 </View>
                 <View style={styles.expenseAmount}>
-                  <Text style={styles.expenseAmountText}>
+                  <Text style={[styles.expenseAmountText, { color: colors.text }]}>
                     {formatAmount(expense.amount, expense.currency)}
                   </Text>
                 </View>
@@ -267,12 +328,12 @@ export default function GroupDetailScreen() {
 
       {/* Danger Zone */}
       <View style={styles.dangerSection}>
-        <Text style={styles.dangerTitle}>Danger Zone</Text>
+        <Text style={[styles.dangerTitle, { color: colors.error }]}>Danger Zone</Text>
         <TouchableOpacity
-          style={styles.deleteButton}
+          style={[styles.deleteButton, { borderColor: colors.error }]}
           onPress={handleDeleteGroup}
         >
-          <Text style={styles.deleteButtonText}>Delete Group</Text>
+          <Text style={[styles.deleteButtonText, { color: colors.error }]}>Delete Group</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -282,16 +343,13 @@ export default function GroupDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F9FAFB',
   },
   header: {
-    backgroundColor: '#3B82F6',
     padding: 20,
     paddingTop: 16,
   },
@@ -301,12 +359,10 @@ const styles = StyleSheet.create({
   groupName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FFFFFF',
     marginBottom: 4,
   },
   groupDescription: {
     fontSize: 16,
-    color: '#DBEAFE',
     marginBottom: 16,
   },
   headerStats: {
@@ -321,13 +377,11 @@ const styles = StyleSheet.create({
   },
   headerStatLabel: {
     fontSize: 12,
-    color: '#DBEAFE',
     marginBottom: 4,
   },
   headerStatValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#FFFFFF',
   },
   actionsContainer: {
     flexDirection: 'row',
@@ -366,16 +420,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#111827',
     marginBottom: 12,
   },
   addButton: {
     fontSize: 16,
-    color: '#3B82F6',
     fontWeight: '600',
   },
   memberCard: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 12,
     marginBottom: 8,
@@ -391,7 +442,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#DBEAFE',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -399,7 +449,6 @@ const styles = StyleSheet.create({
   memberAvatarText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#3B82F6',
   },
   memberInfo: {
     flex: 1,
@@ -407,16 +456,13 @@ const styles = StyleSheet.create({
   memberName: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#111827',
     marginBottom: 2,
   },
   memberRole: {
     fontSize: 12,
-    color: '#6B7280',
     textTransform: 'capitalize',
   },
   expenseCard: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 12,
     marginBottom: 8,
@@ -432,7 +478,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#F3F4F6',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -446,12 +491,10 @@ const styles = StyleSheet.create({
   expenseDescription: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#111827',
     marginBottom: 2,
   },
   expenseDate: {
     fontSize: 12,
-    color: '#9CA3AF',
   },
   expenseAmount: {
     marginLeft: 12,
@@ -459,10 +502,8 @@ const styles = StyleSheet.create({
   expenseAmountText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
   },
   emptyState: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 32,
     alignItems: 'center',
@@ -474,12 +515,10 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#6B7280',
     marginBottom: 4,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#9CA3AF',
     textAlign: 'center',
   },
   dangerSection: {
@@ -490,7 +529,6 @@ const styles = StyleSheet.create({
   dangerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#DC2626',
     marginBottom: 12,
   },
   deleteButton: {
@@ -498,26 +536,45 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#EF4444',
   },
   deleteButtonText: {
-    color: '#DC2626',
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',
   },
   errorText: {
     fontSize: 16,
-    color: '#EF4444',
     marginBottom: 16,
   },
   retryButton: {
-    backgroundColor: '#3B82F6',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
   },
   retryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  addMemberForm: {
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+  },
+  addMemberInput: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    marginBottom: 12,
+  },
+  addMemberButton: {
+    borderRadius: 8,
+    padding: 14,
+    alignItems: 'center',
+  },
+  addMemberButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',

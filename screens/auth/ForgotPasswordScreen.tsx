@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '../../types/navigation';
@@ -25,6 +26,7 @@ export default function ForgotPasswordScreen() {
   const [loading, setLoading] = useState(false);
   const { resetPassword } = useAuth();
   const navigation = useNavigation<ForgotPasswordScreenNavigationProp>();
+  const { colors } = useTheme();
 
   const handleResetPassword = async () => {
     if (!email) {
@@ -50,17 +52,18 @@ export default function ForgotPasswordScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.surface }]}
     >
       <View style={styles.content}>
-        <Text style={styles.title}>Återställ lösenord</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, { color: colors.primary }]}>Återställ lösenord</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
           Ange din e-postadress så skickar vi instruktioner för att återställa ditt lösenord
         </Text>
 
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.inputBg, color: colors.text }]}
           placeholder="E-post"
+          placeholderTextColor={colors.textTertiary}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -69,7 +72,7 @@ export default function ForgotPasswordScreen() {
         />
 
         <TouchableOpacity
-          style={styles.button}
+          style={[styles.button, { backgroundColor: colors.primary }]}
           onPress={handleResetPassword}
           disabled={loading}
         >
@@ -84,7 +87,7 @@ export default function ForgotPasswordScreen() {
           onPress={() => navigation.navigate('Login')}
           style={styles.linkButton}
         >
-          <Text style={styles.linkText}>Tillbaka till inloggning</Text>
+          <Text style={[styles.linkText, { color: colors.primary }]}>Tillbaka till inloggning</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -94,7 +97,6 @@ export default function ForgotPasswordScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   content: {
     flex: 1,
@@ -106,24 +108,20 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 8,
     textAlign: 'center',
-    color: '#3b82f6',
   },
   subtitle: {
     fontSize: 16,
-    color: '#6b7280',
     marginBottom: 32,
     textAlign: 'center',
     lineHeight: 22,
   },
   input: {
-    backgroundColor: '#f3f4f6',
     padding: 16,
     borderRadius: 8,
     marginBottom: 16,
     fontSize: 16,
   },
   button: {
-    backgroundColor: '#3b82f6',
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
@@ -139,7 +137,6 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   linkText: {
-    color: '#3b82f6',
     fontSize: 14,
   },
 });

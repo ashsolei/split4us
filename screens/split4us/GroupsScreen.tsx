@@ -20,6 +20,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { groupsApi, Split4UsGroup } from '../../lib/split4us/api';
 import { formatAmount } from '../../lib/split4us/utils';
 import type { RootStackParamList } from '../../types/navigation';
+import { useTheme } from '../../contexts/ThemeContext';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -30,6 +31,7 @@ export default function GroupsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const { colors } = useTheme();
 
   useEffect(() => {
     loadGroups();
@@ -47,8 +49,8 @@ export default function GroupsScreen() {
         const active = result.data.filter(g => !g.is_archived);
         setGroups(active);
       }
-    } catch (err) {
-      console.error('Failed to load groups:', err);
+    } catch {
+      // Error handled via state
       setError('Failed to load groups');
     } finally {
       setLoading(false);
@@ -68,35 +70,35 @@ export default function GroupsScreen() {
 
   const renderGroupCard = ({ item }: { item: Split4UsGroup }) => (
     <TouchableOpacity
-      style={styles.groupCard}
+      style={[styles.groupCard, { backgroundColor: colors.card }]}
       onPress={() => navigation.navigate('GroupDetail', { groupId: item.id })}
     >
       <View style={styles.groupHeader}>
-        <View style={styles.groupIcon}>
+        <View style={[styles.groupIcon, { backgroundColor: colors.primaryLight }]}>
           <Text style={styles.groupEmoji}>👥</Text>
         </View>
         <View style={styles.groupInfo}>
-          <Text style={styles.groupName}>{item.name}</Text>
+          <Text style={[styles.groupName, { color: colors.text }]}>{item.name}</Text>
           {item.description && (
-            <Text style={styles.groupDescription} numberOfLines={1}>
+            <Text style={[styles.groupDescription, { color: colors.textSecondary }]} numberOfLines={1}>
               {item.description}
             </Text>
           )}
         </View>
       </View>
 
-      <View style={styles.groupStats}>
+      <View style={[styles.groupStats, { borderTopColor: colors.border }]}>
         <View style={styles.stat}>
-          <Text style={styles.statLabel}>Members</Text>
-          <Text style={styles.statValue}>{item.member_count || 0}</Text>
+          <Text style={[styles.statLabel, { color: colors.textTertiary }]}>Members</Text>
+          <Text style={[styles.statValue, { color: colors.text }]}>{item.member_count || 0}</Text>
         </View>
         <View style={styles.stat}>
-          <Text style={styles.statLabel}>Expenses</Text>
-          <Text style={styles.statValue}>{item.total_expenses || 0}</Text>
+          <Text style={[styles.statLabel, { color: colors.textTertiary }]}>Expenses</Text>
+          <Text style={[styles.statValue, { color: colors.text }]}>{item.total_expenses || 0}</Text>
         </View>
         <View style={styles.stat}>
-          <Text style={styles.statLabel}>Currency</Text>
-          <Text style={styles.statValue}>{item.currency}</Text>
+          <Text style={[styles.statLabel, { color: colors.textTertiary }]}>Currency</Text>
+          <Text style={[styles.statValue, { color: colors.text }]}>{item.currency}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -104,20 +106,21 @@ export default function GroupsScreen() {
 
   if (loading) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#3B82F6" />
+      <View style={[styles.centerContainer, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Search Bar */}
-      <View style={styles.searchContainer}>
+      <View style={[styles.searchContainer, { backgroundColor: colors.surface }]}>
         <Text style={styles.searchIcon}>🔍</Text>
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { color: colors.text }]}
           placeholder="Search groups..."
+          placeholderTextColor={colors.textTertiary}
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
@@ -126,23 +129,23 @@ export default function GroupsScreen() {
       {/* Groups List */}
       {error ? (
         <View style={styles.centerContainer}>
-          <Text style={styles.errorText}>❌ {error}</Text>
-          <TouchableOpacity onPress={loadGroups} style={styles.retryButton}>
+          <Text style={[styles.errorText, { color: colors.error }]}>❌ {error}</Text>
+          <TouchableOpacity onPress={loadGroups} style={[styles.retryButton, { backgroundColor: colors.primary }]}>
             <Text style={styles.retryButtonText}>Retry</Text>
           </TouchableOpacity>
         </View>
       ) : filteredGroups.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyIcon}>👥</Text>
-          <Text style={styles.emptyText}>
+          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
             {searchQuery ? 'No groups found' : 'No groups yet'}
           </Text>
-          <Text style={styles.emptySubtext}>
+          <Text style={[styles.emptySubtext, { color: colors.textTertiary }]}>
             {searchQuery ? 'Try a different search' : 'Create your first group to get started'}
           </Text>
           {!searchQuery && (
             <TouchableOpacity
-              style={styles.createButton}
+              style={[styles.createButton, { backgroundColor: colors.primary }]}
               onPress={() => navigation.navigate('CreateGroup')}
             >
               <Text style={styles.createButtonText}>Create Group</Text>
@@ -164,7 +167,7 @@ export default function GroupsScreen() {
       {/* Floating Action Button */}
       {groups.length > 0 && (
         <TouchableOpacity
-          style={styles.fab}
+          style={[styles.fab, { backgroundColor: colors.primary }]}
           onPress={() => navigation.navigate('CreateGroup')}
         >
           <Text style={styles.fabIcon}>+</Text>
@@ -177,7 +180,6 @@ export default function GroupsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
   },
   centerContainer: {
     flex: 1,
@@ -187,7 +189,6 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
     margin: 16,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -205,14 +206,12 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: '#111827',
   },
   listContent: {
     padding: 16,
     paddingTop: 0,
   },
   groupCard: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -231,7 +230,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#DBEAFE',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -245,32 +243,27 @@ const styles = StyleSheet.create({
   groupName: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#111827',
     marginBottom: 2,
   },
   groupDescription: {
     fontSize: 14,
-    color: '#6B7280',
   },
   groupStats: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
   },
   stat: {
     alignItems: 'center',
   },
   statLabel: {
     fontSize: 12,
-    color: '#9CA3AF',
     marginBottom: 4,
   },
   statValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
   },
   emptyContainer: {
     flex: 1,
@@ -285,17 +278,14 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#6B7280',
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 16,
-    color: '#9CA3AF',
     textAlign: 'center',
     marginBottom: 24,
   },
   createButton: {
-    backgroundColor: '#3B82F6',
     paddingHorizontal: 32,
     paddingVertical: 12,
     borderRadius: 8,
@@ -312,7 +302,6 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#3B82F6',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
@@ -328,11 +317,9 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: '#EF4444',
     marginBottom: 16,
   },
   retryButton: {
-    backgroundColor: '#3B82F6',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,

@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '../../types/navigation';
@@ -23,6 +24,7 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
   const navigation = useNavigation<LoginScreenNavigationProp>();
+  const { colors } = useTheme();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -42,15 +44,16 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.surface }]}
     >
       <View style={styles.content}>
-        <Text style={styles.title}>Split4Us</Text>
-        <Text style={styles.subtitle}>Logga in på ditt konto</Text>
+        <Text style={[styles.title, { color: colors.primary }]}>Split4Us</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Logga in på ditt konto</Text>
 
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.inputBg, color: colors.text }]}
           placeholder="E-post"
+          placeholderTextColor={colors.textTertiary}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -59,8 +62,9 @@ export default function LoginScreen() {
         />
 
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.inputBg, color: colors.text }]}
           placeholder="Lösenord"
+          placeholderTextColor={colors.textTertiary}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -68,7 +72,7 @@ export default function LoginScreen() {
         />
 
         <TouchableOpacity
-          style={styles.button}
+          style={[styles.button, { backgroundColor: colors.primary }]}
           onPress={handleLogin}
           disabled={loading}
         >
@@ -83,13 +87,13 @@ export default function LoginScreen() {
           onPress={() => navigation.navigate('ForgotPassword')}
           style={styles.linkButton}
         >
-          <Text style={styles.linkText}>Glömt lösenord?</Text>
+          <Text style={[styles.linkText, { color: colors.primary }]}>Glömt lösenord?</Text>
         </TouchableOpacity>
 
         <View style={styles.registerContainer}>
-          <Text style={styles.registerText}>Inget konto? </Text>
+          <Text style={[styles.registerText, { color: colors.textSecondary }]}>Inget konto? </Text>
           <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-            <Text style={styles.registerLink}>Registrera dig</Text>
+            <Text style={[styles.registerLink, { color: colors.primary }]}>Registrera dig</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -100,7 +104,6 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   content: {
     flex: 1,
@@ -112,23 +115,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 8,
     textAlign: 'center',
-    color: '#3b82f6',
   },
   subtitle: {
     fontSize: 16,
-    color: '#6b7280',
     marginBottom: 32,
     textAlign: 'center',
   },
   input: {
-    backgroundColor: '#f3f4f6',
     padding: 16,
     borderRadius: 8,
     marginBottom: 16,
     fontSize: 16,
   },
   button: {
-    backgroundColor: '#3b82f6',
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
@@ -144,7 +143,6 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   linkText: {
-    color: '#3b82f6',
     fontSize: 14,
   },
   registerContainer: {
@@ -153,11 +151,9 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   registerText: {
-    color: '#6b7280',
     fontSize: 14,
   },
   registerLink: {
-    color: '#3b82f6',
     fontSize: 14,
     fontWeight: '600',
   },

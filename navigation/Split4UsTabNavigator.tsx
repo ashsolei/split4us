@@ -8,6 +8,7 @@ import React from 'react';
 import { Platform, Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import type { Split4UsTabParamList } from '../types/navigation';
+import { useTheme } from '../contexts/ThemeContext';
 
 // Import screens
 import DashboardScreen from '../screens/split4us/DashboardScreen';
@@ -18,16 +19,17 @@ import SettingsScreen from '../screens/split4us/SettingsScreen';
 const Tab = createBottomTabNavigator<Split4UsTabParamList>();
 
 export default function Split4UsTabNavigator() {
+  const { colors } = useTheme();
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#3B82F6',
-        tabBarInactiveTintColor: '#9CA3AF',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textTertiary,
         tabBarStyle: {
-          backgroundColor: '#FFFFFF',
+          backgroundColor: colors.tabBar,
           borderTopWidth: 1,
-          borderTopColor: '#E5E7EB',
+          borderTopColor: colors.border,
           paddingBottom: Platform.OS === 'ios' ? 20 : 5,
           paddingTop: 5,
           height: Platform.OS === 'ios' ? 85 : 60,
@@ -43,8 +45,8 @@ export default function Split4UsTabNavigator() {
         component={DashboardScreen}
         options={{
           title: 'Dashboard',
-          tabBarIcon: ({ color, size }) => (
-            <TabIcon emoji="🏠" color={color} size={size} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <TabIcon emoji="🏠" color={color} size={size} focused={focused} />
           ),
         }}
       />
@@ -54,8 +56,8 @@ export default function Split4UsTabNavigator() {
         component={GroupsScreen}
         options={{
           title: 'Groups',
-          tabBarIcon: ({ color, size }) => (
-            <TabIcon emoji="👥" color={color} size={size} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <TabIcon emoji="👥" color={color} size={size} focused={focused} />
           ),
         }}
       />
@@ -65,8 +67,8 @@ export default function Split4UsTabNavigator() {
         component={ExpensesScreen}
         options={{
           title: 'Expenses',
-          tabBarIcon: ({ color, size }) => (
-            <TabIcon emoji="📊" color={color} size={size} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <TabIcon emoji="📊" color={color} size={size} focused={focused} />
           ),
         }}
       />
@@ -76,8 +78,8 @@ export default function Split4UsTabNavigator() {
         component={SettingsScreen}
         options={{
           title: 'Settings',
-          tabBarIcon: ({ color, size }) => (
-            <TabIcon emoji="⚙️" color={color} size={size} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <TabIcon emoji="⚙️" color={color} size={size} focused={focused} />
           ),
         }}
       />
@@ -86,9 +88,9 @@ export default function Split4UsTabNavigator() {
 }
 
 // Simple emoji icon component
-function TabIcon({ emoji, color, size }: { emoji: string; color: string; size: number }) {
+function TabIcon({ emoji, size, focused }: { emoji: string; color: string; size: number; focused?: boolean }) {
   return (
-    <Text style={{ fontSize: size, opacity: color === '#3B82F6' ? 1 : 0.6 }}>
+    <Text style={{ fontSize: size, opacity: focused ? 1 : 0.5 }}>
       {emoji}
     </Text>
   );

@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useTheme } from '../contexts/ThemeContext';
 
 // Import navigators & screens
 import Split4UsTabNavigator from './Split4UsTabNavigator';
@@ -22,13 +23,14 @@ import { RootStackParamList } from '../types/navigation';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootStackNavigator() {
+  const { colors } = useTheme();
   return (
     <Stack.Navigator
       screenOptions={{
         headerStyle: {
-          backgroundColor: '#3B82F6',
+          backgroundColor: colors.headerBg,
         },
-        headerTintColor: '#FFFFFF',
+        headerTintColor: colors.headerText,
         headerTitleStyle: {
           fontWeight: 'bold',
         },

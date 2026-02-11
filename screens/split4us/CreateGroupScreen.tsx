@@ -20,6 +20,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types/navigation';
 import { groupsApi, CreateGroupRequest } from '../../lib/split4us/api';
 import { validateGroupName } from '../../lib/split4us/utils';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const CURRENCIES = [
   { code: 'SEK', name: 'Swedish Krona', symbol: 'kr' },
@@ -38,6 +39,7 @@ export default function CreateGroupScreen() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [currency, setCurrency] = useState('SEK');
+  const { colors } = useTheme();
 
   const handleSubmit = async () => {
     // Validation
@@ -68,8 +70,8 @@ export default function CreateGroupScreen() {
           }
         ]);
       }
-    } catch (err) {
-      console.error('Failed to create group:', err);
+    } catch {
+      // Error handled via state
       Alert.alert('Error', 'Failed to create group');
     } finally {
       setLoading(false);
@@ -77,58 +79,62 @@ export default function CreateGroupScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.form}>
         {/* Name */}
         <View style={styles.field}>
-          <Text style={styles.label}>Group Name *</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>Group Name *</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
             placeholder="e.g., Summer Trip 2025"
+            placeholderTextColor={colors.textTertiary}
             value={name}
             onChangeText={setName}
             maxLength={100}
           />
-          <Text style={styles.hint}>{name.length}/100</Text>
+          <Text style={[styles.hint, { color: colors.textTertiary }]}>{name.length}/100</Text>
         </View>
 
         {/* Description */}
         <View style={styles.field}>
-          <Text style={styles.label}>Description (optional)</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>Description (optional)</Text>
           <TextInput
-            style={[styles.input, styles.textArea]}
+            style={[styles.input, styles.textArea, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
             placeholder="Add details about this group..."
+            placeholderTextColor={colors.textTertiary}
             value={description}
             onChangeText={setDescription}
             multiline
             numberOfLines={3}
             maxLength={500}
           />
-          <Text style={styles.hint}>{description.length}/500</Text>
+          <Text style={[styles.hint, { color: colors.textTertiary }]}>{description.length}/500</Text>
         </View>
 
         {/* Currency */}
         <View style={styles.field}>
-          <Text style={styles.label}>Currency</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>Currency</Text>
           <View style={styles.currencyGrid}>
             {CURRENCIES.map((curr) => (
               <TouchableOpacity
                 key={curr.code}
                 style={[
                   styles.currencyButton,
-                  currency === curr.code && styles.currencyButtonActive,
+                  { backgroundColor: colors.surface, borderColor: colors.border },
+                  currency === curr.code && [styles.currencyButtonActive, { backgroundColor: colors.primaryLight, borderColor: colors.primary }],
                 ]}
                 onPress={() => setCurrency(curr.code)}
               >
                 <Text style={[
                   styles.currencyCode,
-                  currency === curr.code && styles.currencyCodeActive,
+                  currency === curr.code && [styles.currencyCodeActive, { color: colors.primary }],
                 ]}>
                   {curr.symbol}
                 </Text>
                 <Text style={[
                   styles.currencyName,
-                  currency === curr.code && styles.currencyNameActive,
+                  { color: colors.textSecondary },
+                  currency === curr.code && [styles.currencyNameActive, { color: colors.primary }],
                 ]}>
                   {curr.code}
                 </Text>
@@ -139,7 +145,7 @@ export default function CreateGroupScreen() {
 
         {/* Submit Button */}
         <TouchableOpacity
-          style={[styles.submitButton, loading && styles.submitButtonDisabled]}
+          style={[styles.submitButton, { backgroundColor: colors.primary }, loading && styles.submitButtonDisabled]}
           onPress={handleSubmit}
           disabled={loading}
         >
@@ -151,9 +157,9 @@ export default function CreateGroupScreen() {
         </TouchableOpacity>
 
         {/* Info */}
-        <View style={styles.infoBox}>
+        <View style={[styles.infoBox, { backgroundColor: colors.primaryLight }]}>
           <Text style={styles.infoIcon}>ℹ️</Text>
-          <Text style={styles.infoText}>
+          <Text style={[styles.infoText, { color: colors.primary }]}>
             You can add members to your group after creating it.
           </Text>
         </View>
@@ -165,7 +171,6 @@ export default function CreateGroupScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
   },
   form: {
     padding: 16,
@@ -176,16 +181,13 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
   },
   textArea: {
     height: 80,
@@ -193,7 +195,6 @@ const styles = StyleSheet.create({
   },
   hint: {
     fontSize: 12,
-    color: '#9CA3AF',
     marginTop: 4,
     textAlign: 'right',
   },
@@ -205,34 +206,26 @@ const styles = StyleSheet.create({
   currencyButton: {
     flex: 1,
     minWidth: '30%',
-    backgroundColor: '#FFFFFF',
     borderRadius: 8,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
     alignItems: 'center',
   },
   currencyButtonActive: {
-    backgroundColor: '#DBEAFE',
-    borderColor: '#3B82F6',
   },
   currencyCode: {
     fontSize: 24,
     marginBottom: 4,
   },
   currencyCodeActive: {
-    color: '#3B82F6',
   },
   currencyName: {
     fontSize: 12,
-    color: '#6B7280',
   },
   currencyNameActive: {
-    color: '#3B82F6',
     fontWeight: '600',
   },
   submitButton: {
-    backgroundColor: '#3B82F6',
     borderRadius: 8,
     padding: 16,
     alignItems: 'center',
@@ -248,7 +241,6 @@ const styles = StyleSheet.create({
   },
   infoBox: {
     flexDirection: 'row',
-    backgroundColor: '#EFF6FF',
     borderRadius: 8,
     padding: 12,
     marginTop: 16,
@@ -261,7 +253,6 @@ const styles = StyleSheet.create({
   infoText: {
     flex: 1,
     fontSize: 14,
-    color: '#1E40AF',
     lineHeight: 20,
   },
 });

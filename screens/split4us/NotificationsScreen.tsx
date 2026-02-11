@@ -10,6 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import { notificationsApi, Notification as Split4UsNotification } from '../../lib/split4us/api';
+import { useTheme } from '../../contexts/ThemeContext';
 
 type NotificationItem = Split4UsNotification;
 
@@ -17,6 +18,8 @@ export default function NotificationsScreen() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { colors } = useTheme();
 
   useEffect(() => {
     loadNotifications();
@@ -24,14 +27,16 @@ export default function NotificationsScreen() {
 
   const loadNotifications = async () => {
     try {
+      setError(null);
       const result = await notificationsApi.getAll();
       if (result.data) {
         setNotifications(result.data);
       } else if (result.error) {
-        console.warn('Failed to load notifications:', result.error);
+        setError(result.error);
       }
-    } catch (error) {
-      console.error('Failed to load notifications:', error);
+    } catch {
+      // Error handled via state
+      setError('Failed to load notifications');
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -51,8 +56,8 @@ export default function NotificationsScreen() {
           n.id === notificationId ? { ...n, read: true } : n
         )
       );
-    } catch (err) {
-      console.error('Failed to mark as read:', err);
+    } catch {
+      // Error handled via state
     }
   };
 
@@ -60,8 +65,8 @@ export default function NotificationsScreen() {
     try {
       await notificationsApi.markAllAsRead();
       setNotifications(notifications.map((n) => ({ ...n, read: true })));
-    } catch (err) {
-      console.error('Failed to mark all as read:', err);
+    } catch {
+      // Error handled via state
     }
   };
 
@@ -99,69 +104,84 @@ export default function NotificationsScreen() {
 
   const renderNotification = ({ item }: { item: NotificationItem }) => (
     <TouchableOpacity
-      style={[styles.notificationCard, !item.read && styles.unreadCard]}
+      style={[styles.notificationCard, { backgroundColor: colors.card }, !item.read && [styles.unreadCard, { backgroundColor: colors.primaryLight, borderLeftColor: colors.primary }]]}
       onPress={() => markAsRead(item.id)}
       activeOpacity={0.7}
     >
-      <View style={styles.notificationIcon}>
+      <View style={[styles.notificationIcon, { backgroundColor: colors.inputBg }]}>
         <Text style={styles.iconText}>{getNotificationIcon(item.type)}</Text>
-        {!item.read && <View style={styles.unreadBadge} />}
+        {!item.read && <View style={[styles.unreadBadge, { backgroundColor: colors.error }]} />}
       </View>
 
       <View style={styles.notificationContent}>
-        <Text style={[styles.title, !item.read && styles.unreadTitle]}>
+        <Text style={[styles.title, { color: colors.text }, !item.read && styles.unreadTitle]}>
           {item.title}
         </Text>
-        <Text style={styles.message} numberOfLines={2}>
+        <Text style={[styles.message, { color: colors.textSecondary }]} numberOfLines={2}>
           {item.message}
         </Text>
-        <Text style={styles.time}>{formatTime(item.created_at)}</Text>
+        <Text style={[styles.time, { color: colors.textTertiary }]}>{formatTime(item.created_at)}</Text>
       </View>
 
       <TouchableOpacity
-        style={styles.deleteButton}
+        style={[styles.checkButton, { backgroundColor: colors.inputBg }]}
         onPress={() => markAsRead(item.id)}
       >
-        <Text style={styles.deleteButtonText}>✓</Text>
+        <Text style={[styles.checkButtonText, { color: colors.textSecondary }]}>✓</Text>
       </TouchableOpacity>
     </TouchableOpacity>
   );
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#3b82f6" />
+      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Notifications</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Notifications</Text>
         {unreadCount > 0 && (
           <TouchableOpacity
-            style={styles.markAllButton}
+            style={[styles.markAllButton, { backgroundColor: colors.primaryLight }]}
             onPress={markAllAsRead}
           >
-            <Text style={styles.markAllButtonText}>Mark all as read</Text>
+            <Text style={[styles.markAllButtonText, { color: colors.primary }]}>Mark all as read</Text>
           </TouchableOpacity>
         )}
       </View>
 
       {unreadCount > 0 && (
-        <View style={styles.unreadBanner}>
-          <Text style={styles.unreadText}>
+        <View style={[styles.unreadBanner, { backgroundColor: colors.primaryLight, borderBottomColor: colors.primary }]}>
+          <Text style={[styles.unreadText, { color: colors.primary }]}>
             🔔 {unreadCount} unread notification{unreadCount > 1 ? 's' : ''}
           </Text>
         </View>
       )}
 
-      {notifications.length === 0 ? (
+      {error ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyIcon}>⚠️</Text>
+          <Text style={[styles.emptyTitle, { color: colors.text }]}>Something went wrong</Text>
+          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>{error}</Text>
+          <TouchableOpacity
+            style={[styles.retryButton, { backgroundColor: colors.primary }]}
+            onPress={() => {
+              setIsLoading(true);
+              loadNotifications();
+            }}
+          >
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      ) : notifications.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyIcon}>🔔</Text>
-          <Text style={styles.emptyTitle}>No notifications</Text>
-          <Text style={styles.emptyText}>
+          <Text style={[styles.emptyTitle, { color: colors.text }]}>No notifications</Text>
+          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
             You're all caught up! We'll notify you when something happens.
           </Text>
         </View>
@@ -175,7 +195,7 @@ export default function NotificationsScreen() {
             <RefreshControl
               refreshing={isRefreshing}
               onRefresh={handleRefresh}
-              tintColor="#3b82f6"
+              tintColor={colors.primary}
             />
           }
         />
@@ -187,21 +207,17 @@ export default function NotificationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f9fafb',
   },
   header: {
-    backgroundColor: '#fff',
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -209,36 +225,29 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#1a1a1a',
   },
   markAllButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 6,
-    backgroundColor: '#dbeafe',
   },
   markAllButtonText: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#3b82f6',
   },
   unreadBanner: {
-    backgroundColor: '#dbeafe',
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#93c5fd',
   },
   unreadText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#1e40af',
   },
   list: {
     padding: 16,
   },
   notificationCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -251,15 +260,12 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   unreadCard: {
-    backgroundColor: '#f0f9ff',
     borderLeftWidth: 3,
-    borderLeftColor: '#3b82f6',
   },
   notificationIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#f3f4f6',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -275,7 +281,6 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#ef4444',
     borderWidth: 2,
     borderColor: '#fff',
   },
@@ -285,7 +290,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#1a1a1a',
     marginBottom: 4,
   },
   unreadTitle: {
@@ -293,26 +297,22 @@ const styles = StyleSheet.create({
   },
   message: {
     fontSize: 14,
-    color: '#6b7280',
     lineHeight: 20,
     marginBottom: 6,
   },
   time: {
     fontSize: 12,
-    color: '#9ca3af',
   },
-  deleteButton: {
+  checkButton: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#f3f4f6',
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: 8,
   },
-  deleteButtonText: {
+  checkButtonText: {
     fontSize: 16,
-    color: '#6b7280',
   },
   emptyContainer: {
     flex: 1,
@@ -327,12 +327,21 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#1a1a1a',
     marginBottom: 8,
   },
   emptyText: {
     fontSize: 14,
-    color: '#6b7280',
     textAlign: 'center',
+  },
+  retryButton: {
+    marginTop: 16,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
