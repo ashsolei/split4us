@@ -131,7 +131,14 @@ export default function BalancesScreen() {
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Balances</Text>
           {sortedBalances.length > 0 && (
             <TouchableOpacity
-              onPress={() => shareBalanceSummary(balances, groupId)}
+              onPress={() => shareBalanceSummary(
+                balances.map(b => ({
+                  name: b.user?.full_name || b.user?.email || b.user_id,
+                  amount: b.balance,
+                  currency: b.currency,
+                })),
+                groupId
+              )}
               style={[styles.shareButton, { backgroundColor: colors.primaryLight }]}
             >
               <Text style={[styles.shareButtonText, { color: colors.primary }]}>📤 Share</Text>
