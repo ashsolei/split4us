@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -30,6 +30,18 @@ export const SplitConfigurator: React.FC<SplitConfiguratorProps> = ({
 }) => {
   const [splitType, setSplitType] = useState<'equal' | 'percentage' | 'custom'>('equal');
   const [splits, setSplits] = useState<SplitParticipant[]>(participants);
+
+  // Calculate equal split on mount and when participants/amount change
+  useEffect(() => {
+    if (splitType === 'equal' && participants.length > 0 && totalAmount > 0) {
+      calculateEqualSplit();
+    }
+  }, [participants, totalAmount]);
+
+  // Keep splits in sync when participants change
+  useEffect(() => {
+    setSplits(participants);
+  }, [participants]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('sv-SE', {

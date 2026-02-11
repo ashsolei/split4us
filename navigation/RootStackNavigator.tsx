@@ -14,9 +14,10 @@ import CreateGroupScreen from '../screens/split4us/CreateGroupScreen';
 import CreateExpenseScreen from '../screens/split4us/CreateExpenseScreen';
 import ExpenseDetailScreen from '../screens/split4us/ExpenseDetailScreen';
 import BalancesScreen from '../screens/split4us/BalancesScreen';
+import NotificationsScreen from '../screens/split4us/NotificationsScreen';
 
 // Types
-import { RootStackParamList } from './types';
+import { RootStackParamList } from '../types/navigation';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -82,6 +83,15 @@ export default function RootStackNavigator() {
         component={BalancesScreen}
         options={{
           title: 'Balances',
+          presentation: 'card',
+        }}
+      />
+
+      <Stack.Screen
+        name="Notifications"
+        component={NotificationsScreen}
+        options={{
+          title: 'Notifications',
           presentation: 'card',
         }}
       />

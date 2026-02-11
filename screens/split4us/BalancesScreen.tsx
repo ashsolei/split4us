@@ -17,9 +17,10 @@ import {
 } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
-import type { RootStackParamList } from '../../navigation/types';
+import type { RootStackParamList } from '../../types/navigation';
 import { balancesApi, UserBalance, SettlementSuggestion } from '../../lib/split4us/api';
 import { formatAmount, getBalanceColor, getUserDisplayName } from '../../lib/split4us/utils';
+import { shareBalanceSummary } from '../../lib/split4us/export';
 
 type RouteType = RouteProp<RootStackParamList, 'BalancesScreen'>;
 
@@ -31,6 +32,7 @@ export default function BalancesScreen() {
   const [settlements, setSettlements] = useState<SettlementSuggestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [processingSettlement, setProcessingSettlement] = useState<string | null>(null);
 
   useEffect(() => {
@@ -41,11 +43,16 @@ export default function BalancesScreen() {
 
   const loadData = async () => {
     try {
+      setError(null);
       const [balancesResult, settlementsResult] = await Promise.all([
         balancesApi.getAll(groupId),
         balancesApi.getSettlementSuggestions(groupId),
       ]);
 
+      if (balancesResult.error) {
+        setError(balancesResult.error);
+        return;
+      }
       if (balancesResult.data) {
         setBalances(balancesResult.data);
       }
@@ -54,6 +61,7 @@ export default function BalancesScreen() {
       }
     } catch (err) {
       console.error('Failed to load balances:', err);
+      setError('Failed to load balances');
     } finally {
       setLoading(false);
       setRefreshing(false);

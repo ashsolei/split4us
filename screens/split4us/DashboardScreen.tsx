@@ -18,16 +18,12 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { balancesApi, expensesApi, Split4UsExpense, UserBalance } from '../../lib/split4us/api';
 import { formatAmount, formatRelativeTime, getCategoryById } from '../../lib/split4us/utils';
 import { supabase } from '../../lib/supabase';
-import type { RootStackParamList } from '../../types/navigation';
-
-type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function DashboardScreen() {
-  const navigation = useNavigation<NavigationProp>();
+  const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [totalBalance, setTotalBalance] = useState(0);
@@ -106,8 +102,17 @@ export default function DashboardScreen() {
     >
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Split4Us</Text>
-        <Text style={styles.subtitle}>Dela utgifter smart</Text>
+        <View>
+          <Text style={styles.title}>Split4Us</Text>
+          <Text style={styles.subtitle}>Dela utgifter smart</Text>
+        </View>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Notifications')}
+          style={styles.notificationBell}
+          accessibilityLabel="Notifications"
+        >
+          <Text style={{ fontSize: 24 }}>🔔</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Quick Stats */}
@@ -135,7 +140,7 @@ export default function DashboardScreen() {
         <View style={styles.actionsGrid}>
           <TouchableOpacity
             style={[styles.actionButton, { backgroundColor: '#3B82F6' }]}
-            onPress={() => navigation.navigate('CreateExpense' as never)}
+            onPress={() => navigation.navigate('CreateExpense')}
           >
             <Text style={styles.actionIcon}>➕</Text>
             <Text style={styles.actionText}>Add Expense</Text>
@@ -143,7 +148,7 @@ export default function DashboardScreen() {
 
           <TouchableOpacity
             style={[styles.actionButton, { backgroundColor: '#10B981' }]}
-            onPress={() => navigation.navigate('Split4UsGroups' as never)}
+            onPress={() => navigation.navigate('Split4UsGroups')}
           >
             <Text style={styles.actionIcon}>👥</Text>
             <Text style={styles.actionText}>Groups</Text>
@@ -151,7 +156,7 @@ export default function DashboardScreen() {
 
           <TouchableOpacity
             style={[styles.actionButton, { backgroundColor: '#8B5CF6' }]}
-            onPress={() => navigation.navigate('Split4UsBalances' as never)}
+            onPress={() => navigation.navigate('Split4UsExpenses')}
           >
             <Text style={styles.actionIcon}>💰</Text>
             <Text style={styles.actionText}>Balances</Text>
@@ -159,7 +164,7 @@ export default function DashboardScreen() {
 
           <TouchableOpacity
             style={[styles.actionButton, { backgroundColor: '#F59E0B' }]}
-            onPress={() => navigation.navigate('Split4UsExpenses' as never)}
+            onPress={() => navigation.navigate('Split4UsExpenses')}
           >
             <Text style={styles.actionIcon}>📊</Text>
             <Text style={styles.actionText}>Expenses</Text>
@@ -224,6 +229,18 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 60,
     backgroundColor: '#3B82F6',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  notificationBell: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 4,
   },
   title: {
     fontSize: 28,

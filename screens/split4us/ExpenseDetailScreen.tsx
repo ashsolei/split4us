@@ -21,7 +21,7 @@ import {
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
-import type { RootStackParamList } from '../../navigation/types';
+import type { RootStackParamList } from '../../types/navigation';
 import { expensesApi, Split4UsExpense } from '../../lib/split4us/api';
 import { formatAmount, formatDate, getCategoryById, getUserDisplayName } from '../../lib/split4us/utils';
 
@@ -72,7 +72,11 @@ export default function ExpenseDetailScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              await expensesApi.delete(expenseId);
+              const result = await expensesApi.delete(expenseId);
+              if (result.error) {
+                Alert.alert('Error', result.error);
+                return;
+              }
               Alert.alert('Success', 'Expense deleted', [
                 { text: 'OK', onPress: () => navigation.goBack() }
               ]);
@@ -161,9 +165,9 @@ export default function ExpenseDetailScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Split ({expense.splits.length} people)</Text>
           {expense.splits.map((split, index) => (
-            <View key={index} style={styles.splitRow}>
+            <View key={split.user_id || index} style={styles.splitRow}>
               <Text style={styles.splitUser}>
-                Person {index + 1}
+                {getUserDisplayName({ email: split.user_id })}
               </Text>
               <Text style={styles.splitAmount}>
                 {formatAmount(split.amount, expense.currency)}

@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import * as SecureStore from 'expo-secure-store';
 
 // Use environment variables - never hardcode credentials
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://jdvgnwftjivmqcllezxa.supabase.co';
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
 
 if (!supabaseUrl || !supabaseAnonKey) {

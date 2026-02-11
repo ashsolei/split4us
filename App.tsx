@@ -4,6 +4,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { OnlineStatusIndicator } from './components/OnlineStatusIndicator';
 import Navigation from './navigation';
 
 function AppContent() {
@@ -12,6 +13,7 @@ function AppContent() {
     <SafeAreaProvider>
       <AuthProvider>
         <Navigation />
+        <OnlineStatusIndicator />
         <StatusBar style={isDark ? 'light' : 'auto'} />
       </AuthProvider>
     </SafeAreaProvider>

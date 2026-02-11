@@ -2,7 +2,7 @@
   "expo": {
     "name": "Split4Us",
     "slug": "split4us-mobile",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -39,9 +39,6 @@
           "cameraPermission": "The app accesses your camera to let you take photos of receipts."
         }
       ],
-      [
-        "expo-document-picker"
-      ]
     ],
     "scheme": "split4us",
     "extra": {

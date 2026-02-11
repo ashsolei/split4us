@@ -1,4 +1,8 @@
-import { NavigatorScreenParams } from '@react-navigation/native';
+/**
+ * Split4Us Navigation Types
+ *
+ * Single source of truth for all navigation type definitions
+ */
 
 // Split4Us Tab Navigator
 export type Split4UsTabParamList = {
@@ -10,30 +14,15 @@ export type Split4UsTabParamList = {
 
 // Root Stack Navigator
 export type RootStackParamList = {
-  Auth: undefined;
-  Main: NavigatorScreenParams<MainTabParamList>;
-  ContractDetail: { contractId: string };
-  CreateContract: undefined;
-  EditContract: { contractId: string };
-  NotificationSettings: undefined;
-  WebhookSettings: undefined;
-  CalendarSync: undefined;
-  Profile: undefined;
-  // Split4Us Screens
+  // Main tab container
+  MainTabs: undefined;
+  // Modal / Detail Screens
   GroupDetail: { groupId: string };
   CreateGroup: undefined;
-  CreateExpense: { groupId?: string };
+  CreateExpense: { groupId?: string } | undefined;
   ExpenseDetail: { expenseId: string };
   BalancesScreen: { groupId: string };
-};
-
-// Main Tab Navigator
-export type MainTabParamList = {
-  Dashboard: undefined;
-  Contracts: undefined;
-  Calendar: undefined;
-  Split4Us: NavigatorScreenParams<Split4UsTabParamList>;
-  More: undefined;
+  Notifications: undefined;
 };
 
 // Auth Stack Navigator
@@ -45,6 +34,6 @@ export type AuthStackParamList = {
 
 declare global {
   namespace ReactNavigation {
-    interface RootParamList extends RootStackParamList {}
+    interface RootParamList extends RootStackParamList, Split4UsTabParamList {}
   }
 }

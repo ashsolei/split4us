@@ -25,6 +25,7 @@ import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../types/navigation';
 import { groupsApi, membersApi, expensesApi, Split4UsGroup, GroupMember, Split4UsExpense } from '../../lib/split4us/api';
 import { formatAmount, formatRelativeTime, getCategoryById, getUserDisplayName } from '../../lib/split4us/utils';
+import { shareExpensesCSV } from '../../lib/split4us/export';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type RouteType = RouteProp<RootStackParamList, 'GroupDetail'>;
@@ -99,7 +100,11 @@ export default function GroupDetailScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              await groupsApi.delete(groupId);
+              const result = await groupsApi.delete(groupId);
+              if (result.error) {
+                Alert.alert('Error', result.error);
+                return;
+              }
               Alert.alert('Success', 'Group deleted', [
                 { text: 'OK', onPress: () => navigation.goBack() }
               ]);
@@ -183,11 +188,15 @@ export default function GroupDetailScreen() {
         <TouchableOpacity
           style={[styles.actionButton, { backgroundColor: '#8B5CF6' }]}
           onPress={() => {
-            Alert.alert('Coming Soon', 'Analytics feature coming soon!');
+            if (expenses.length === 0) {
+              Alert.alert('No Data', 'No expenses to export yet.');
+              return;
+            }
+            shareExpensesCSV(expenses, group.name);
           }}
         >
-          <Text style={styles.actionIcon}>📊</Text>
-          <Text style={styles.actionText}>Analytics</Text>
+          <Text style={styles.actionIcon}>📤</Text>
+          <Text style={styles.actionText}>Export</Text>
         </TouchableOpacity>
       </View>
 

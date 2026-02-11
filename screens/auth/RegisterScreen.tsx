@@ -36,8 +36,8 @@ export default function RegisterScreen() {
       return;
     }
 
-    if (password.length < 6) {
-      Alert.alert('Fel', 'Lösenordet måste vara minst 6 tecken');
+    if (password.length < 8) {
+      Alert.alert('Fel', 'Lösenordet måste vara minst 8 tecken');
       return;
     }
 

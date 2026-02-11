@@ -22,7 +22,8 @@ import {
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
-import type { RootStackParamList } from '../../navigation/types';
+import type { RootStackParamList } from '../../types/navigation';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import {
   expensesApi,
   groupsApi,
@@ -60,6 +61,7 @@ export default function CreateExpenseScreen() {
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('food');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState(prefilledGroupId || '');
   const [paidBy, setPaidBy] = useState('');
   const [notes, setNotes] = useState('');
@@ -289,6 +291,31 @@ export default function CreateExpenseScreen() {
             value={amount}
             onChangeText={setAmount}
           />
+        </View>
+
+        {/* Date */}
+        <View style={styles.field}>
+          <Text style={styles.label}>Date</Text>
+          <TouchableOpacity
+            style={styles.input}
+            onPress={() => setShowDatePicker(true)}
+          >
+            <Text style={{ color: '#1a1a1a', fontSize: 16 }}>📅 {date}</Text>
+          </TouchableOpacity>
+          {showDatePicker && (
+            <DateTimePicker
+              value={new Date(date)}
+              mode="date"
+              display="default"
+              maximumDate={new Date()}
+              onChange={(event, selectedDate) => {
+                setShowDatePicker(false);
+                if (selectedDate) {
+                  setDate(selectedDate.toISOString().split('T')[0]);
+                }
+              }}
+            />
+          )}
         </View>
 
         {/* Category */}

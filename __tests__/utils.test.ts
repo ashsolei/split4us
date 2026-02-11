@@ -254,3 +254,61 @@ describe('stringToColor', () => {
     expect(stringToColor('alice')).not.toBe(stringToColor('bob'));
   });
 });
+
+// ==================== DATE FORMATTING ====================
+
+describe('formatDate', () => {
+  it('should format ISO date string', () => {
+    const result = formatDate('2026-02-11');
+    expect(result).toBeTruthy();
+    expect(typeof result).toBe('string');
+    // Should contain year
+    expect(result).toContain('2026');
+  });
+
+  it('should format Date object', () => {
+    const result = formatDate(new Date(2026, 1, 11));
+    expect(result).toContain('2026');
+  });
+
+  it('should handle ISO datetime strings', () => {
+    const result = formatDate('2025-12-31T23:59:59Z');
+    // Locale-dependent; may show Dec 31 2025 or Jan 1 2026 depending on TZ
+    expect(result).toBeTruthy();
+    expect(typeof result).toBe('string');
+  });
+});
+
+describe('formatRelativeTime', () => {
+  it('should return "just now" for recent dates', () => {
+    const now = new Date();
+    expect(formatRelativeTime(now)).toBe('just now');
+  });
+
+  it('should return minutes for recent past', () => {
+    const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
+    expect(formatRelativeTime(fiveMinAgo)).toBe('5m ago');
+  });
+
+  it('should return hours for same day', () => {
+    const threeHoursAgo = new Date(Date.now() - 3 * 60 * 60 * 1000);
+    expect(formatRelativeTime(threeHoursAgo)).toBe('3h ago');
+  });
+
+  it('should return days for recent past', () => {
+    const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+    expect(formatRelativeTime(twoDaysAgo)).toBe('2d ago');
+  });
+
+  it('should return formatted date for old dates', () => {
+    const oldDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const result = formatRelativeTime(oldDate);
+    // Should not contain "ago" since it's over a week
+    expect(result).not.toContain('ago');
+  });
+
+  it('should accept string dates', () => {
+    const result = formatRelativeTime(new Date().toISOString());
+    expect(result).toBe('just now');
+  });
+});

@@ -19,7 +19,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { groupsApi, Split4UsGroup } from '../../lib/split4us/api';
 import { formatAmount } from '../../lib/split4us/utils';
-import type { RootStackParamList } from '../../navigation/types';
+import type { RootStackParamList } from '../../types/navigation';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
