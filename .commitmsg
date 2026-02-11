@@ -1,0 +1,15 @@
+chore: cleanup docs, dead code, and fix barrel exports
+
+Documentation:
+- Rewrite README.md from HomeAuto to Split4Us
+- Delete 23 session-log/completion .md files
+- Keep only README.md, DEEP_LINKING_GUIDE.md, NAVIGATION_GUIDE.md
+
+Code cleanup:
+- Delete 343-line offline-support.ts (only NetworkStatus was used)
+- Extract NetworkStatus to lib/network-status.ts (38 lines)
+- Update OnlineStatusIndicator import path
+
+Barrel exports:
+- Add NotificationsScreen to screens/split4us/index.ts
+- Remove duplicate Split4UsScreenParams type (already in types/navigation.ts)

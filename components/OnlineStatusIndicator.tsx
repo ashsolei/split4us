@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
-import { NetworkStatus } from '../lib/offline-support';
+import { NetworkStatus } from '../lib/network-status';
 
 export const OnlineStatusIndicator: React.FC = () => {
   const [isOnline, setIsOnline] = useState(true);

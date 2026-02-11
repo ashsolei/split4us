@@ -1,321 +1,98 @@
-# HomeAuto Mobile App
+# Split4Us
 
-React Native mobilapp för HomeAuto avtalshanteringssystem. Tillgänglig för både iOS och Android.
+React Native mobilapp för delning av utgifter. Byggd med Expo SDK 54, TypeScript och Supabase.
 
-## 🚀 Funktioner
+## Funktioner
 
 ### Autentisering
-- ✅ E-post/lösenord inloggning
-- ✅ Registrering av nya användare
-- ✅ Återställning av lösenord
-- ✅ Säker tokenhantering med Expo SecureStore
+- E-post/lösenord inloggning
+- Registrering av nya användare
+- Återställning av lösenord
+- Säker tokenhantering med Expo SecureStore
 
-### Avtalhantering
-- ✅ Lista alla avtal med sök och filter
-- ✅ Detaljerad avtalsvy
-- ✅ Skapa nya avtal
-- ✅ Redigera befintliga avtal
-- ✅ Ta bort avtal
-- ✅ Kategorisering och taggning
-- ✅ Filuppladdning (kommande)
+### Grupper
+- Skapa och hantera grupper
+- Bjud in medlemmar
+- Se grupputgifter och balanser
 
-### Dashboard
-- ✅ Översikt av alla avtal
-- ✅ Statistik (totalt, aktiva, utgående)
-- ✅ Månadskostnadsöversikt
-- ✅ Lista på utgående avtal (3 månader)
-- ✅ Snabbåtgärder
+### Utgifter
+- Skapa utgifter med kategori, belopp och beskrivning
+- Datumväljare
+- Flera split-typer: lika, procent, exakt, andelar
+- Exportera utgifter som CSV
 
-### Kalender
-- ✅ Månadsvy med utgångsdatum
-- ✅ Händelsevisning per dag
-- ✅ Olika händelsetyper (utgång, förnyelse, påminnelse)
-- ✅ Färgkodade statusar
+### Balanser
+- Se vem som är skyldig vem
+- Dela balanssammanfattning
+- Sortering efter belopp
 
-### Inställningar
-- ✅ Profilhantering
-- ✅ Notifieringsinställningar
-  - E-post
-  - Push-notifieringar
-  - Slack
-  - Microsoft Teams
-- ✅ Kalendersynkronisering (Google, Outlook)
-- ✅ Webhook-konfiguration
-- ✅ Lösenordsändring
+### Notifikationer
+- Nya utgifter, grupper och påminnelser
+- Markera som läst
+- Realtidsuppdateringar
 
-## 📱 Teknisk Stack
+## Tech Stack
 
-### Ramverk & Bibliotek
-- **React Native** (via Expo)
-- **TypeScript** - Typsäkerhet
-- **Expo Router** - Navigation
-- **React Navigation** - Stack & Tab navigation
-- **Supabase** - Backend & Autentisering
-- **Expo SecureStore** - Säker datalagring
-- **Date-fns** - Datumhantering
+| Teknologi | Version |
+|-----------|---------|
+| React Native | 0.81.4 |
+| Expo SDK | 54 |
+| React | 19.1 |
+| TypeScript | 5.9.2 |
+| Supabase | Auth + DB |
+| React Navigation | 7 |
 
-### UI-komponenter
-- React Native Core Components
-- Ionicons - Ikoner
-- DateTimePicker - Datumväljare
-- React Native Gesture Handler
-
-## 🛠 Installation
-
-### Förutsättningar
-- Node.js 18+
-- npm eller yarn
-- Expo CLI
-- iOS Simulator (för iOS) eller Android Studio (för Android)
-
-### Steg 1: Installera dependencies
-```bash
-cd mobile
-npm install
-```
-
-### Steg 2: Konfigurera Supabase
-Supabase-konfigurationen finns redan i `lib/supabase.ts`. Uppdatera vid behov:
-```typescript
-const supabaseUrl = 'DIN_SUPABASE_URL';
-const supabaseAnonKey = 'DIN_SUPABASE_ANON_KEY';
-```
-
-### Steg 3: Starta utvecklingsserver
-```bash
-# Starta Expo
-npm start
-
-# För iOS
-npm run ios
-
-# För Android
-npm run android
-
-# För webläsare
-npm run web
-```
-
-## 📂 Projektstruktur
-
-```
-mobile/
-├── app/                    # App-konfiguration
-├── assets/                 # Bilder, ikoner, fonts
-├── contexts/              # React Contexts
-│   └── AuthContext.tsx    # Autentiseringskontext
-├── lib/                   # Hjälpfunktioner
-│   └── supabase.ts       # Supabase-klient
-├── navigation/            # Navigation
-│   └── index.tsx         # Root navigator
-├── screens/              # App-skärmar
-│   ├── auth/            # Autentisering
-│   │   ├── LoginScreen.tsx
-│   │   ├── RegisterScreen.tsx
-│   │   └── ForgotPasswordScreen.tsx
-│   ├── main/            # Huvudskärmar
-│   │   ├── DashboardScreen.tsx
-│   │   ├── ContractsScreen.tsx
-│   │   ├── CalendarScreen.tsx
-│   │   └── MoreScreen.tsx
-│   ├── contracts/       # Avtalsdetaljer
-│   │   ├── ContractDetailScreen.tsx
-│   │   ├── CreateContractScreen.tsx
-│   │   └── EditContractScreen.tsx
-│   └── settings/        # Inställningar
-│       ├── ProfileScreen.tsx
-│       ├── NotificationSettingsScreen.tsx
-│       ├── CalendarSyncScreen.tsx
-│       └── WebhookSettingsScreen.tsx
-├── types/                # TypeScript-typer
-│   └── navigation.ts     # Navigation-typer
-├── App.tsx              # Root-komponent
-├── app.json             # Expo-konfiguration
-├── package.json         # Dependencies
-└── tsconfig.json        # TypeScript-konfiguration
-```
-
-## 🎨 Design
-
-Appen använder ett modernt, rent designspråk med:
-- **Färgschema**: Blått primärfärg (#3b82f6)
-- **Typografi**: System-standard fonts
-- **Komponenter**: Native iOS/Android-känsla
-- **Ikoner**: Ionicons
-- **Spacing**: Konsekvent 4px-grid
-
-### Färgpalett
-```
-Primary: #3b82f6 (blå)
-Success: #10b981 (grön)
-Warning: #f59e0b (orange)
-Danger: #ef4444 (röd)
-Gray scale: #111827 → #f9fafb
-```
-
-## 📊 Databasschema
-
-Appen använder följande Supabase-tabeller:
-
-### contracts
-- id, title, description
-- category, supplier, contract_number
-- start_date, end_date
-- monthly_cost, yearly_cost
-- contact_person, contact_email, contact_phone
-- payment_method, auto_renewal, notice_period_days
-- file_url, tags
-- user_id, created_at, updated_at
-
-### profiles
-- id, email, full_name
-- company, phone
-- created_at, updated_at
-
-### notification_settings
-- user_id, notify_expiring_contracts
-- notify_before_days
-- email_notifications, push_notifications
-- slack_notifications, teams_notifications
-
-## 🔒 Säkerhet
-
-- ✅ Supabase Row Level Security (RLS)
-- ✅ Säker tokenhantering med Expo SecureStore
-- ✅ Automatisk token-refresh
-- ✅ HTTPS-kommunikation
-- ✅ Input-validering
-
-## 🧪 Testning
+## Kom igång
 
 ```bash
-# Kör TypeScript type checking
-npx tsc --noEmit
-
-# Kör linter
-npm run lint
+npm install --legacy-peer-deps
+cp .env.example .env
+npx expo start
 ```
 
-## 📦 Bygg och Deploy
+### Miljövariabler
 
-**✅ DEPLOYMENT READY!** Alla tekniska förutsättningar uppfyllda.
+Skapa en `.env`-fil med:
 
-📚 **Deployment Guides:**
-- **[DEPLOYMENT_QUICKSTART.md](DEPLOYMENT_QUICKSTART.md)** - Snabbguide (10 minuter)
-- **[EXPO_DEPLOY_VERIFICATION.md](EXPO_DEPLOY_VERIFICATION.md)** - Komplett verifiering & troubleshooting
+```
+EXPO_PUBLIC_SUPABASE_URL=din-supabase-url
+EXPO_PUBLIC_SUPABASE_ANON_KEY=din-anon-key
+EXPO_PUBLIC_API_URL=http://localhost:3000
+```
 
-### Snabbstart (10 minuter)
+## Testning
 
 ```bash
-# 1. Installera EAS CLI
-npm install -g eas-cli
-
-# 2. Logga in
-eas login
-
-# 3. Initiera projekt (får Expo project ID)
-eas project:init
-
-# 4. Skapa Expo token
-eas token:create
-# → Lägg till token i GitHub Secrets som EXPO_TOKEN
-
-# 5. Test build
-eas build --profile preview --platform all
-
-# 6. Production deploy via GitHub Release
-gh release create v1.0.0
+npx jest
+npx jest --coverage
 ```
 
-### iOS
+60 tester i 3 testsviter:
+- `utils.test.ts` — Formatering, kategorier, validering
+- `api.test.ts` — API-klient med mockad Supabase/fetch
+- `export.test.ts` — CSV-export och balanssammanfattning
+
+## Docker
+
 ```bash
-# Development build (simulator)
-eas build --profile development --platform ios
-
-# Production build
-eas build --profile production --platform ios
-
-# Submit till App Store
-eas submit --platform ios
+docker build --target test -t split4us:test .
+docker run --rm split4us:test
+docker build --target base -t split4us:dev .
 ```
 
-### Android
-```bash
-# Development build (APK)
-eas build --profile development --platform android
+## Projektstruktur
 
-# Production build (AAB)
-eas build --profile production --platform android
-
-# Submit till Google Play
-eas submit --platform android
+```
+components/          # UI-komponenter
+contexts/            # React Context (Auth, Theme)
+lib/split4us/        # API-klient, utils, export
+navigation/          # React Navigation setup
+screens/auth/        # Login, Register, ForgotPassword
+screens/split4us/    # Alla appskärmar
+types/               # TypeScript-typer
+__tests__/           # Jest-tester
 ```
 
-### Automatisk Deploy via GitHub Actions
+## Licens
 
-När du skapar en GitHub Release körs automatisk deployment:
-1. Uppdatera version i `app.json`
-2. Skapa release: `gh release create v1.0.0`
-3. GitHub Actions bygger och submitar till båda stores
-
-Se [GITHUB_SETUP_COMPLETE.md](GITHUB_SETUP_COMPLETE.md) för CI/CD setup.
-
-## 🐛 Felsökning
-
-### Vanliga problem
-
-**Problem**: "Cannot find module '@expo/vector-icons'"
-```bash
-npm install @expo/vector-icons
-```
-
-**Problem**: "DateTimePicker not working"
-```bash
-npm install @react-native-community/datetimepicker
-```
-
-**Problem**: "Navigation errors"
-```bash
-npm install @react-navigation/native @react-navigation/native-stack @react-navigation/bottom-tabs
-npm install react-native-screens react-native-safe-area-context
-```
-
-**Problem**: "Supabase connection errors"
-- Kontrollera Supabase URL och API key
-- Verifiera nätverksanslutning
-- Kolla Supabase dashboard för eventuella problem
-
-## 🚧 Kommande funktioner
-
-- [ ] Push-notifieringar (Expo Notifications)
-- [ ] Offline-support med AsyncStorage
-- [ ] Filuppladdning och kameraintegration
-- [ ] Biometrisk autentisering (Face ID/Touch ID)
-- [ ] Delning av avtal mellan användare
-- [ ] Export av rapporter (PDF)
-- [ ] Mörkt tema
-- [ ] Flerspråksstöd (i18n)
-- [ ] Analytics och tracking
-
-## 📝 Changelog
-
-### Version 1.0.0 (2025-10-08)
-- ✅ Initial release
-- ✅ Komplett autentiseringssystem
-- ✅ Avtalhantering (CRUD)
-- ✅ Dashboard med statistik
-- ✅ Kalendervy
-- ✅ Inställningar och profil
-- ✅ Notifieringsinställningar
-- ✅ Integration med befintlig webb-backend
-
-## 👥 Support
-
-För support eller frågor:
-- 📧 Email: support@homeauto.se
-- 🐛 Issues: GitHub Issues
-- 📖 Dokumentation: /docs/
-
-## 📄 Licens
-
-© 2025 HomeAuto. Alla rättigheter förbehållna.
+MIT
