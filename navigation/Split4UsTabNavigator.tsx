@@ -88,8 +88,8 @@ export default function Split4UsTabNavigator() {
 // Simple emoji icon component
 function TabIcon({ emoji, color, size }: { emoji: string; color: string; size: number }) {
   return (
-    <span style={{ fontSize: size, opacity: color === '#3B82F6' ? 1 : 0.6 }}>
+    <Text style={{ fontSize: size, opacity: color === '#3B82F6' ? 1 : 0.6 }}>
       {emoji}
-    </span>
+    </Text>
   );
 }

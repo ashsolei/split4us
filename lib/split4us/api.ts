@@ -1,51 +1,111 @@
 /**
  * Split4Us Mobile API Client
- * 
- * Kommunicerar med HomeAuto web API för Split4Us funktionalitet
+ *
+ * Kommunicerar med Split4Us web API
  */
 
 import { supabase } from '../supabase';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1000;
 
 interface ApiResponse<T> {
   data?: T;
   error?: string;
+  status?: number;
+}
+
+interface ApiError {
+  message: string;
+  status?: number;
+  code?: string;
 }
 
 /**
- * Helper för att göra API-anrop med auth
+ * Delay helper for retry backoff
+ */
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Helper för att göra API-anrop med auth och retry
  */
 async function apiRequest<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  retries: number = MAX_RETRIES
 ): Promise<ApiResponse<T>> {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      return { error: 'Not authenticated', status: 401 };
+    }
+
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
-      ...(session?.access_token && {
-        'Authorization': `Bearer ${session.access_token}`,
-      }),
+      Authorization: `Bearer ${session.access_token}`,
       ...options.headers,
     };
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      ...options,
-      headers,
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      return { error: errorData.error || response.statusText };
+    try {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...options,
+        headers,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || errorData.message || response.statusText;
+
+        // Retry on 5xx server errors
+        if (response.status >= 500 && retries > 0) {
+          await delay(RETRY_DELAY_MS * (MAX_RETRIES - retries + 1));
+          return apiRequest<T>(endpoint, options, retries - 1);
+        }
+
+        return { error: errorMessage, status: response.status };
+      }
+
+      // Handle 204 No Content
+      if (response.status === 204) {
+        return { data: undefined as unknown as T };
+      }
+
+      const data = await response.json();
+      return { data };
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      throw fetchError;
+    }
+  } catch (error) {
+    // Retry on network errors
+    if (retries > 0 && error instanceof TypeError) {
+      await delay(RETRY_DELAY_MS * (MAX_RETRIES - retries + 1));
+      return apiRequest<T>(endpoint, options, retries - 1);
     }
 
-    const data = await response.json();
-    return { data };
-  } catch (error) {
-    console.error('API request failed:', error);
-    return { error: error instanceof Error ? error.message : 'Network error' };
+    const apiError: ApiError = {
+      message: error instanceof Error ? error.message : 'Unknown network error',
+    };
+
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      apiError.message = 'Request timed out';
+      apiError.code = 'TIMEOUT';
+    }
+
+    console.error(`API request failed: ${endpoint}`, apiError);
+    return { error: apiError.message };
   }
 }
 

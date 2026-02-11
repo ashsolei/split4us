@@ -1,0 +1,48 @@
+# ============================================
+# Split4Us - Docker Compose
+# ============================================
+
+services:
+  # Development server
+  dev:
+    build:
+      context: .
+      target: development
+    ports:
+      - "8081:8081"
+      - "19000:19000"
+      - "19001:19001"
+      - "19002:19002"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - EXPO_PUBLIC_SUPABASE_URL=${EXPO_PUBLIC_SUPABASE_URL}
+      - EXPO_PUBLIC_SUPABASE_ANON_KEY=${EXPO_PUBLIC_SUPABASE_ANON_KEY}
+      - EXPO_PUBLIC_API_URL=${EXPO_PUBLIC_API_URL:-http://localhost:3000}
+      - EXPO_PUBLIC_APP_ENV=development
+    restart: unless-stopped
+
+  # Test runner
+  test:
+    build:
+      context: .
+      target: test
+    environment:
+      - CI=true
+      - NODE_ENV=test
+    profiles:
+      - test
+
+  # Production web build (nginx)
+  web:
+    build:
+      context: .
+      target: production
+    ports:
+      - "3001:80"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    profiles:
+      - production

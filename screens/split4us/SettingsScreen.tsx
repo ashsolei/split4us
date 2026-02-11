@@ -22,15 +22,16 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/types';
 import { supabase } from '../../lib/supabase';
+import { useTheme } from '../../contexts/ThemeContext';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function SettingsScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const { isDark, setMode } = useTheme();
   const [user, setUser] = useState<any>(null);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     loadUser();
@@ -146,10 +147,10 @@ export default function SettingsScreen() {
             </Text>
           </View>
           <Switch
-            value={darkMode}
-            onValueChange={setDarkMode}
+            value={isDark}
+            onValueChange={(val) => setMode(val ? 'dark' : 'light')}
             trackColor={{ false: '#E5E7EB', true: '#93C5FD' }}
-            thumbColor={darkMode ? '#3B82F6' : '#F3F4F6'}
+            thumbColor={isDark ? '#3B82F6' : '#F3F4F6'}
           />
         </View>
       </View>
@@ -160,10 +161,10 @@ export default function SettingsScreen() {
 
         <TouchableOpacity
           style={styles.settingRow}
-          onPress={() => Alert.alert('Split4Us', 'Version 1.0.0\n\nExpense sharing made easy!')}
+          onPress={() => Alert.alert('Split4Us', 'Version 1.1.0\n\nExpense sharing made easy!')}
         >
           <Text style={styles.settingLabel}>App Version</Text>
-          <Text style={styles.settingValueText}>1.0.0</Text>
+          <Text style={styles.settingValueText}>1.1.0</Text>
         </TouchableOpacity>
 
         <TouchableOpacity

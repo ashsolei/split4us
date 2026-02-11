@@ -45,7 +45,7 @@ export default function LoginScreen() {
       style={styles.container}
     >
       <View style={styles.content}>
-        <Text style={styles.title}>HomeAuto</Text>
+        <Text style={styles.title}>Split4Us</Text>
         <Text style={styles.subtitle}>Logga in på ditt konto</Text>
 
         <TextInput

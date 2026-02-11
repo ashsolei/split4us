@@ -1,40 +1,66 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { NetworkStatus } from '../lib/offline-support';
 
 export const OnlineStatusIndicator: React.FC = () => {
   const [isOnline, setIsOnline] = useState(true);
+  const [showBanner, setShowBanner] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(0));
+  const wasOffline = useRef(false);
 
   useEffect(() => {
-    // Check initial status
-    NetworkStatus.isOnline().then(setIsOnline);
-
-    // Subscribe to status changes
-    const unsubscribe = NetworkStatus.subscribe((online) => {
+    NetworkStatus.isOnline().then((online) => {
       setIsOnline(online);
-      
-      // Animate in
-      Animated.sequence([
+      if (!online) {
+        wasOffline.current = true;
+        setShowBanner(true);
         Animated.timing(fadeAnim, {
           toValue: 1,
           duration: 300,
           useNativeDriver: true,
-        }),
-        Animated.delay(3000),
+        }).start();
+      }
+    });
+
+    const unsubscribe = NetworkStatus.subscribe((online) => {
+      setIsOnline(online);
+
+      if (!online) {
+        // Going offline
+        wasOffline.current = true;
+        setShowBanner(true);
         Animated.timing(fadeAnim, {
-          toValue: 0,
+          toValue: 1,
           duration: 300,
           useNativeDriver: true,
-        }),
-      ]).start();
+        }).start();
+      } else if (wasOffline.current) {
+        // Coming back online - show briefly then fade
+        setShowBanner(true);
+        Animated.sequence([
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.delay(3000),
+          Animated.timing(fadeAnim, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ]).start(() => {
+          setShowBanner(false);
+          wasOffline.current = false;
+        });
+      }
     });
 
     return unsubscribe;
   }, []);
 
-  if (isOnline) {
-    return null; // Don't show when online
+  if (!showBanner) {
+    return null;
   }
 
   return (

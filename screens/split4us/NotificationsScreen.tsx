@@ -7,22 +7,14 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
-import { supabase } from '../../lib/supabase';
+import { notificationsApi, Notification as Split4UsNotification } from '../../lib/split4us/api';
 
-interface Notification {
-  id: string;
-  type: 'expense_added' | 'payment_received' | 'settlement_requested' | 'group_invite';
-  title: string;
-  message: string;
-  read: boolean;
-  created_at: string;
-  expense_id?: string;
-  group_id?: string;
-}
+type NotificationItem = Split4UsNotification;
 
 export default function NotificationsScreen() {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -32,48 +24,12 @@ export default function NotificationsScreen() {
 
   const loadNotifications = async () => {
     try {
-      // Simulate loading notifications
-      // In production, this would fetch from Supabase
-      const mockNotifications: Notification[] = [
-        {
-          id: '1',
-          type: 'expense_added',
-          title: 'New Expense Added',
-          message: 'Anna added "Lunch" for 250 SEK in Stockholm Trip',
-          read: false,
-          created_at: new Date().toISOString(),
-          expense_id: 'exp-1',
-          group_id: 'group-1',
-        },
-        {
-          id: '2',
-          type: 'payment_received',
-          title: 'Payment Received',
-          message: 'Erik paid you 150 SEK',
-          read: false,
-          created_at: new Date(Date.now() - 3600000).toISOString(),
-        },
-        {
-          id: '3',
-          type: 'settlement_requested',
-          title: 'Settlement Request',
-          message: 'Maria requested settlement for Weekend Trip',
-          read: true,
-          created_at: new Date(Date.now() - 7200000).toISOString(),
-          group_id: 'group-2',
-        },
-        {
-          id: '4',
-          type: 'group_invite',
-          title: 'Group Invitation',
-          message: 'John invited you to join "Summer Vacation 2024"',
-          read: true,
-          created_at: new Date(Date.now() - 86400000).toISOString(),
-          group_id: 'group-3',
-        },
-      ];
-
-      setNotifications(mockNotifications);
+      const result = await notificationsApi.getAll();
+      if (result.data) {
+        setNotifications(result.data);
+      } else if (result.error) {
+        console.warn('Failed to load notifications:', result.error);
+      }
     } catch (error) {
       console.error('Failed to load notifications:', error);
     } finally {
@@ -88,19 +44,25 @@ export default function NotificationsScreen() {
   };
 
   const markAsRead = async (notificationId: string) => {
-    setNotifications(
-      notifications.map((n) =>
-        n.id === notificationId ? { ...n, read: true } : n
-      )
-    );
+    try {
+      await notificationsApi.markAsRead(notificationId);
+      setNotifications(
+        notifications.map((n) =>
+          n.id === notificationId ? { ...n, read: true } : n
+        )
+      );
+    } catch (err) {
+      console.error('Failed to mark as read:', err);
+    }
   };
 
   const markAllAsRead = async () => {
-    setNotifications(notifications.map((n) => ({ ...n, read: true })));
-  };
-
-  const deleteNotification = async (notificationId: string) => {
-    setNotifications(notifications.filter((n) => n.id !== notificationId));
+    try {
+      await notificationsApi.markAllAsRead();
+      setNotifications(notifications.map((n) => ({ ...n, read: true })));
+    } catch (err) {
+      console.error('Failed to mark all as read:', err);
+    }
   };
 
   const getNotificationIcon = (type: string) => {
@@ -135,7 +97,7 @@ export default function NotificationsScreen() {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const renderNotification = ({ item }: { item: Notification }) => (
+  const renderNotification = ({ item }: { item: NotificationItem }) => (
     <TouchableOpacity
       style={[styles.notificationCard, !item.read && styles.unreadCard]}
       onPress={() => markAsRead(item.id)}
@@ -158,9 +120,9 @@ export default function NotificationsScreen() {
 
       <TouchableOpacity
         style={styles.deleteButton}
-        onPress={() => deleteNotification(item.id)}
+        onPress={() => markAsRead(item.id)}
       >
-        <Text style={styles.deleteButtonText}>✕</Text>
+        <Text style={styles.deleteButtonText}>✓</Text>
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -204,7 +166,7 @@ export default function NotificationsScreen() {
           </Text>
         </View>
       ) : (
-        <FlatList
+        <FlatList<NotificationItem>
           data={notifications}
           renderItem={renderNotification}
           keyExtractor={(item) => item.id}
